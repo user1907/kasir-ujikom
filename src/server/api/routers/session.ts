@@ -18,7 +18,7 @@ export const sessionRouter = createTRPCRouter({
 
       // Check if user exists and password is correct
       if (user.length === 0) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid credentials" });
-      if (await verify(user[0]!.password, input.password)) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid credentials" });
+      if (await verify(user[0]!.password, input.password) === false) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid credentials" });
 
       ctx.cookies.set("session", jwt.sign({ id: user[0]!.id }), { httpOnly: true });
 
