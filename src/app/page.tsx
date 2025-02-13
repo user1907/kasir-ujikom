@@ -13,7 +13,7 @@ import { LoginSchema } from "@/schemas/users";
 import { toast } from "sonner";
 import { navigate } from "@/components/navigate";
 
-export default function Home() {
+export default function Login() {
   const { mutate: login } = api.session.create.useMutation({
     onSuccess: async () => {
       toast.success("Logged in successfully");
