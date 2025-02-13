@@ -2,6 +2,7 @@
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
 import { date, decimal, integer, pgEnum, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { createSelectSchema } from "drizzle-zod";
 
 export const userLevel = pgEnum("user_levels", ["administrator", "user"]);
 
@@ -11,6 +12,10 @@ export const users = pgTable("users", {
   username: varchar({ length: 50 }).notNull(),
   password: text().notNull(),
   level: userLevel().notNull()
+});
+export const usersSchema = createSelectSchema(users, {
+  username: type => type.max(50).regex(/^[a-zA-Z0-9_]+$/, "Username must be alphanumeric"),
+  password: type => type.min(8, "Password must be at least 8 characters")
 });
 
 export const products = pgTable("products", {

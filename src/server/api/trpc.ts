@@ -9,6 +9,7 @@
 import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { parse, serialize, type SerializeOptions } from "cookie";
 
 import { db } from "@/server/db";
 
@@ -24,9 +25,31 @@ import { db } from "@/server/db";
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = async (opts: { headers: Headers }) => {
+export const createTRPCContext = async (opts: { headers: Headers, res: { headers: Headers } }) => {
+  const cookies = {
+    get: (name?: string) => {
+      const cookiesHeader = opts.headers?.get("Cookie");
+      if (!cookiesHeader) return null;
+      const cookies = parse(cookiesHeader);
+      return name ? cookies[name] ?? null : cookies;
+    },
+    has: (name: string) => {
+      const cookiesHeader = opts.headers?.get("Cookie");
+      if (!cookiesHeader) return false;
+      const cookies = parse(cookiesHeader);
+      return name in cookies;
+    },
+    set: (name: string, value: string, options?: SerializeOptions) => {
+      opts.res.headers.append("Set-Cookie", serialize(name, value, options));
+    },
+    clear: (name: string) => {
+      opts.res.headers.append("Set-Cookie", serialize(name, "", { maxAge: -1 }));
+    }
+  };
+
   return {
     db,
+    cookies,
     ...opts
   };
 };
