@@ -51,7 +51,7 @@ export default function Login() {
             <Image src="/icon.png" height={64} width={64} alt="Logo" />
             <h1 className="text-3xl font-bold">MyKasir</h1>
           </div>
-          <Card className="w-auto">
+          <Card className="w-[400px]">
             <CardHeader>
               <CardTitle>Login to MyKasir</CardTitle>
               <CardDescription>Login untuk masuk ke MyKasir</CardDescription>
