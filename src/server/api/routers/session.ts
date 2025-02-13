@@ -1,4 +1,4 @@
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { users, usersSchema } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
@@ -23,5 +23,10 @@ export const sessionRouter = createTRPCRouter({
       ctx.cookies.set("session", jwt.sign({ id: user[0]!.id }), { httpOnly: true });
 
       return { name: user[0]!.name };
+    }),
+
+  read: protectedProcedure
+    .query(async ({ ctx }) => {
+      return ctx.user;
     })
 });

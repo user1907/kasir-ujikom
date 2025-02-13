@@ -1,7 +1,7 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { date, decimal, integer, pgEnum, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { date, decimal, integer, pgEnum, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 
 export const userLevel = pgEnum("user_levels", ["administrator", "user"]);
@@ -11,6 +11,7 @@ export const users = pgTable("users", {
   name: varchar({ length: 255 }).notNull(),
   username: varchar({ length: 50 }).notNull(),
   password: text().notNull(),
+  passwordUpdatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   level: userLevel().notNull()
 });
 export const usersSchema = createSelectSchema(users, {

@@ -8,6 +8,13 @@
       "when": 1739413891175,
       "tag": "0000_aspiring_silvermane",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1739430075571,
+      "tag": "0001_friendly_hellion",
+      "breakpoints": true
     }
   ]
 }

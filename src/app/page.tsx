@@ -12,8 +12,19 @@ import { type z } from "zod";
 import { LoginSchema } from "@/schemas/users";
 import { toast } from "sonner";
 import { navigate } from "@/components/navigate";
+import { useEffect } from "react";
+import { redirect } from "next/navigation";
 
 export default function Login() {
+  // By default React Query will always retry on error unless you specify otherwise
+  const user = api.session.read.useQuery(undefined, { retry: false });
+  useEffect(() => {
+    // If user is already logged in, redirect to dashboard
+    if (user.isSuccess) {
+      redirect("/dashboard");
+    }
+  }, [user]);
+
   const { mutate: login } = api.session.create.useMutation({
     onSuccess: async () => {
       toast.success("Logged in successfully");
