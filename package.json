@@ -54,6 +54,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
     "@stylistic/eslint-plugin": "^3.1.0",
     "@types/eslint": "^9.6.1",
     "@types/js-cookie": "^3.0.6",
@@ -73,5 +74,11 @@
   "ct3aMetadata": {
     "initVersion": "7.38.1"
   },
-  "packageManager": "pnpm@9.15.2"
+  "packageManager": "pnpm@10.4.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ]
+  }
 }
