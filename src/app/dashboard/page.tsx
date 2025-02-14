@@ -1,26 +1,8 @@
 "use client";
 
-import { useBreadcrumb } from "@/components/providers/breadcrumb";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useEffect } from "react";
+import { redirect } from "next/navigation";
 
-export default function Dashboard() {
-  const { setBreadcrumbs } = useBreadcrumb();
-  useEffect(() => {
-    setBreadcrumbs([
-      { label: "Dashboard", href: "/dashboard" }
-    ]);
-  }, [setBreadcrumbs]);
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Dashboard</CardTitle>
-        <CardDescription>Dashboard</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p>Dashboard content</p>
-      </CardContent>
-    </Card>
-  );
+export default function DashboardRoot() {
+  redirect("/dashboard/beranda");
+  return null;
 }

@@ -21,12 +21,13 @@ import { toast } from "sonner";
 import { Skeleton } from "./ui/skeleton";
 import { Button } from "./ui/button";
 import { Avatar, AvatarImage } from "./ui/avatar";
+import Link from "next/link";
 
 // Menu items.
 const items = [
   {
     title: "Beranda",
-    url: "#",
+    url: "/dashboard/beranda",
     icon: Home
   },
   {
@@ -52,7 +53,7 @@ const items = [
   },
   {
     title: "Profile",
-    url: "#",
+    url: "/dashboard/profile",
     icon: User2
   }
 ];
@@ -104,13 +105,13 @@ export function AppSidebar() {
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map(item => (
+              {items.filter(i => i.isAdmin === true ? session.data?.level === "administrator" : true).map(item => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
