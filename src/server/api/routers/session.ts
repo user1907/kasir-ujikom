@@ -28,5 +28,12 @@ export const sessionRouter = createTRPCRouter({
   read: protectedProcedure
     .query(async ({ ctx }) => {
       return ctx.user;
+    }),
+
+  delete: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      ctx.cookies.set("session", "", { httpOnly: true });
+
+      return { success: true };
     })
 });

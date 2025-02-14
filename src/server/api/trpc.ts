@@ -141,7 +141,7 @@ export const protectedProcedure = t.procedure.use(timingMiddleware).use(async ({
   const cookie = ctx.cookies.get("session");
 
   if (!cookie) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid session" });
   }
 
   try {
@@ -153,14 +153,14 @@ export const protectedProcedure = t.procedure.use(timingMiddleware).use(async ({
       .where(eq(users.id, session.id));
 
     // The user does not exist or the session is invalid
-    if (user.length === 0) throw new TRPCError({ code: "UNAUTHORIZED" });
+    if (user.length === 0) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid session" });
 
     // The user password is updated after the session is created
     if (
       user[0]?.passwordUpdatedAt !== undefined
       && session.iat < (user[0].passwordUpdatedAt.getTime() / 1000)
     ) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "INvalid session" });
     }
 
     return next({
@@ -170,6 +170,6 @@ export const protectedProcedure = t.procedure.use(timingMiddleware).use(async ({
     });
   }
   catch {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid session" });
   }
 });
