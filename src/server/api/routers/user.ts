@@ -17,10 +17,12 @@ export const userRouter = createTRPCRouter({
   update: protectedProcedure
     .input(UserUpdateSchema)
     .mutation(async ({ input, ctx }) => {
-      if (input.id !== ctx.user.id && ctx.user.level !== "administrator") throw new TRPCError({ code: "FORBIDDEN", message: "You do not have permission to modify this user" });
-      if (input.level !== undefined && ctx.user.level !== "administrator") throw new TRPCError({ code: "FORBIDDEN", message: "You do not have permission to modify user levels" });
+      const { id, ...payload } = input;
 
-      const updated: typeof input & { passwordUpdatedAt?: typeof users.$inferInsert["passwordUpdatedAt"] } = { ...input };
+      if (id !== ctx.user.id && ctx.user.level !== "administrator") throw new TRPCError({ code: "FORBIDDEN", message: "You do not have permission to modify this user" });
+      if (payload.level !== undefined && ctx.user.level !== "administrator") throw new TRPCError({ code: "FORBIDDEN", message: "You do not have permission to modify user levels" });
+
+      const updated: typeof payload & { passwordUpdatedAt?: typeof users.$inferInsert["passwordUpdatedAt"] } = { ...payload };
 
       if (updated.password !== undefined) {
         updated.password = await hash(updated.password);

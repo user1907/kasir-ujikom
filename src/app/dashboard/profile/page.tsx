@@ -3,17 +3,11 @@
 import { useBreadcrumb } from "@/components/providers/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Command, CommandEmpty, CommandGroup, CommandList } from "@/components/ui/command";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { UserUpdateSchema } from "@/schemas";
-import { userLevel } from "@/server/db/schema";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CommandItem } from "cmdk";
-import { Check, ChevronsUpDown } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -30,7 +24,7 @@ export default function Profile() {
 
   const currentUser = api.user.read.useQuery();
 
-  const { mutate: updateForm } = api.user.update.useMutation({
+  const { mutate: updateUser } = api.user.update.useMutation({
     onSuccess() {
       toast.success("Profile updated successfully");
     },
@@ -44,8 +38,8 @@ export default function Profile() {
     defaultValues: {
       name: "",
       username: "",
-      level: "user",
-      password: ""
+      password: "",
+      level: "user"
     }
   });
 
@@ -71,7 +65,7 @@ export default function Profile() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form className="space-y-4">
+          <form onSubmit={form.handleSubmit(data => updateUser(data))} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
@@ -110,40 +104,9 @@ export default function Profile() {
                   <FormLabel>
                     Level
                   </FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button variant="outline" role="combobox" className={cn("w-full justify-between", !field.value && "text-muted-foreground")}>
-                          {field.value ? userLevel.enumValues.find(v => v === field.value) : "Select level"}
-                          <ChevronsUpDown className="opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-0">
-                      <Command>
-                        <CommandList>
-                          <CommandEmpty>Invalid user level</CommandEmpty>
-                          <CommandGroup>
-                            {userLevel.enumValues.map(level => (
-                              <CommandItem
-                                value={level}
-                                key={level}
-                                onSelect={() => {
-                                  form.setValue("level", level);
-                                }}
-                                className="flex items-center justify-between px-4 py-2"
-                              >
-                                <span>{level}</span>
-                                <Check
-                                  className={cn("ml-2", level === field.value ? "opacity-100" : "opacity-0")}
-                                />
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                  <FormControl>
+                    <Input disabled={true} {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
