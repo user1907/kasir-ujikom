@@ -147,25 +147,25 @@ export const protectedProcedure = t.procedure.use(timingMiddleware).use(async ({
   try {
     const session = await jwt.verify(cookie as string) as unknown as { id: typeof users.$inferSelect["id"], iat: number, exp: number };
 
-    const user = await db
+    const [user] = await db
       .select()
       .from(users)
       .where(eq(users.id, session.id));
 
     // The user does not exist or the session is invalid
-    if (user.length === 0) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid session" });
+    if (user === undefined) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid session" });
 
     // The user password is updated after the session is created
     if (
-      user[0]?.passwordUpdatedAt !== undefined
-      && session.iat < (user[0].passwordUpdatedAt.getTime() / 1000)
+      user.passwordUpdatedAt !== undefined
+      && session.iat < (user.passwordUpdatedAt.getTime() / 1000)
     ) {
       throw new TRPCError({ code: "UNAUTHORIZED", message: "INvalid session" });
     }
 
     return next({
       ctx: {
-        user: user[0]
+        user
       }
     });
   }

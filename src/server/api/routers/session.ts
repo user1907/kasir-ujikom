@@ -27,7 +27,10 @@ export const sessionRouter = createTRPCRouter({
 
   read: protectedProcedure
     .query(async ({ ctx }) => {
-      return ctx.user;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...user } = ctx.user;
+
+      return user;
     }),
 
   delete: protectedProcedure
