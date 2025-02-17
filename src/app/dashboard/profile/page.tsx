@@ -26,7 +26,7 @@ export default function Profile() {
 
   const { mutate: updateUser } = api.user.update.useMutation({
     onSuccess() {
-      toast.success("Profile updated successfully");
+      toast.success("Profile berhasil diupdate!");
     },
     onError(error) {
       toast.error(error.message);
@@ -50,7 +50,7 @@ export default function Profile() {
   }, [currentUser.isSuccess, currentUser.data, form]);
 
   if (currentUser.isError) {
-    toast.error("You are not logged in");
+    toast.error("Anda tidak memiliki sesi aktif, silahkan login terlebih dahulu!");
     window.location.href = "/";
     return null;
   }
@@ -72,7 +72,7 @@ export default function Profile() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Name
+                    Nama
                   </FormLabel>
                   <FormControl>
                     <Input {...field} />
@@ -127,7 +127,7 @@ export default function Profile() {
               )}
             />
 
-            <Button type="submit">Save</Button>
+            <Button type="submit">Simpan</Button>
           </form>
         </Form>
       </CardContent>

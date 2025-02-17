@@ -15,8 +15,8 @@ export const users = pgTable("users", {
   level: userLevel().notNull()
 });
 export const usersSchema = createSelectSchema(users, {
-  username: type => type.max(50).regex(/^[a-zA-Z0-9_]+$/, "Username must be alphanumeric"),
-  password: type => type.min(8, "Password must be at least 8 characters")
+  username: type => type.max(50).regex(/^[a-zA-Z0-9_]+$/, "Username harus berupa huruf, angka, dan underscore"),
+  password: type => type.min(8, "Password minimal 8 karakter")
 });
 
 export const products = pgTable("products", {

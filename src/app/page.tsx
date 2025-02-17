@@ -27,7 +27,7 @@ export default function Login() {
 
   const { mutate: login } = api.session.create.useMutation({
     onSuccess: async () => {
-      toast.success("Logged in successfully");
+      toast.success("Berhasil login!");
       await navigate("/dashboard");
     },
     onError: (error) => {
