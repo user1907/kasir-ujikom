@@ -1,4 +1,4 @@
-import { UserUpdateSchema } from "@/schemas";
+import { UserCreateSchema, UserUpdateSchema } from "@/schemas";
 import { adminProcedure, createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { users, usersSchema } from "@/server/db/schema";
@@ -6,6 +6,22 @@ import { eq } from "drizzle-orm";
 import { hash } from "@node-rs/argon2";
 
 export const userRouter = createTRPCRouter({
+  create: adminProcedure
+    .input(UserCreateSchema)
+    .mutation(async ({ input, ctx }) => {
+      const password = await hash(input.password);
+
+      return ctx.db
+        .insert(users)
+        .values({ ...input, password })
+        .returning({
+          id: users.id,
+          name: users.name,
+          username: users.username,
+          level: users.level
+        });
+    }),
+
   read: protectedProcedure
     .query(({ ctx }) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
