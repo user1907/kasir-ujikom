@@ -1,5 +1,5 @@
-import { type Table, type Column } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronsUpDown, EyeOff } from "lucide-react";
+import { type Column } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronsUpDown, EyeOff, Search, Plus } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -9,8 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from "@/components/ui/table";
+import { type ColumnDef, type ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, type SortingState, useReactTable } from "@tanstack/react-table";
+import { useState } from "react";
 
 interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -71,7 +75,7 @@ export function DataTableColumnHeader<TData, TValue>({
 }
 
 interface DataTablePaginationProps<TData> {
-  table: Table<TData>
+  table: ReturnType<typeof useReactTable<TData>>
 }
 
 export function DataTablePagination<TData>({
@@ -145,6 +149,121 @@ export function DataTablePagination<TData>({
           </SelectContent>
         </Select>
       </div>
+    </div>
+  );
+}
+
+interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[]
+  data: TData[]
+  createDataText: string
+  createDataAction: () => void
+  isLoading: boolean
+}
+
+export function DataTable<TData, TValue>({
+  columns,
+  data,
+  createDataText,
+  createDataAction,
+  isLoading
+}: DataTableProps<TData, TValue>) {
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
+    state: {
+      sorting,
+      columnFilters
+    }
+  });
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center w-full">
+          <div className="relative w-full">
+            <Input
+              placeholder="Filter nama..."
+              value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+              onChange={event => table.getColumn("name")?.setFilterValue(event.target.value)}
+              className="pr-10" // Add padding to the right to make space for the icon
+            />
+            <Search className="w-5 h-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+          </div>
+        </div>
+        <div>
+          <Button onClick={createDataAction}>
+            <Plus />
+            {createDataText}
+          </Button>
+        </div>
+      </div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map(headerGroup => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {isLoading
+              ? (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      Loading...
+                    </TableCell>
+                  </TableRow>
+                )
+              : (
+                  table.getRowModel().rows?.length
+                    ? (
+                        table.getRowModel().rows.map(row => (
+                          <TableRow
+                            key={row.id}
+                            data-state={row.getIsSelected() && "selected"}
+                          >
+                            {row.getVisibleCells().map(cell => (
+                              <TableCell key={cell.id}>
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))
+                      )
+                    : (
+                        <TableRow>
+                          <TableCell colSpan={columns.length} className="h-24 text-center">
+                            Tidak ada data yang ditemukan.
+                          </TableCell>
+                        </TableRow>
+                      )
+                )}
+          </TableBody>
+        </Table>
+      </div>
+      <DataTablePagination table={table} />
     </div>
   );
 }
