@@ -47,7 +47,7 @@ const items = [
   },
   {
     title: "Manajemen Pengguna",
-    url: "#",
+    url: "/dashboard/users",
     icon: Users2,
     isAdmin: true
   },
@@ -102,7 +102,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent className="flex-1 flex flex-col">
         <SidebarGroup className="flex-1 flex flex-col">
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.filter(i => i.isAdmin === true ? session.data?.level === "administrator" : true).map(item => (

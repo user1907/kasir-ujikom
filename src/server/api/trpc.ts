@@ -137,7 +137,7 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  * This is the base piece you use to build new queries and mutations on your tRPC API. It guarantees
  * that a user querying is authorized, and you can access user session data.
  */
-export const protectedProcedure = t.procedure.use(timingMiddleware).use(async ({ ctx, next }) => {
+export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   const cookie = ctx.cookies.get("session");
 
   if (!cookie) {
@@ -172,4 +172,16 @@ export const protectedProcedure = t.procedure.use(timingMiddleware).use(async ({
   catch {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "Sesi tidak valid" });
   }
+});
+
+/**
+ * Admin procedure
+ *
+ * This is a protected procedure that only allows users with the "admin" role to access it.
+ */
+export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  if (ctx.user.level !== "administrator") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Akses ditolak!" });
+  }
+  return next();
 });

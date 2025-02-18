@@ -1,5 +1,5 @@
 import { UserUpdateSchema } from "@/schemas";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { adminProcedure, createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
@@ -40,5 +40,25 @@ export const userRouter = createTRPCRouter({
           level: users.level,
           passwordUpdatedAt: users.passwordUpdatedAt
         });
+    }),
+
+  list: adminProcedure
+    .query(async ({ ctx }) => {
+      try {
+        const userList = await ctx.db
+          .select({
+            id: users.id,
+            name: users.name,
+            username: users.username,
+            level: users.level
+          })
+          .from(users);
+
+        return userList;
+      }
+      catch (error) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: (error as Error).message });
+        console.error(`[USER_LIST]: ${(error as Error).message}`);
+      }
     })
 });

@@ -9,20 +9,26 @@ export const sessionRouter = createTRPCRouter({
   create: publicProcedure
     .input(usersSchema.pick({ username: true, password: true }))
     .mutation(async ({ input, ctx }) => {
-      const user = await ctx.db
-        .select()
-        .from(users)
-        .where(
-          eq(users.username, input.username)
-        );
+      try {
+        const user = await ctx.db
+          .select()
+          .from(users)
+          .where(
+            eq(users.username, input.username)
+          );
 
-      // Check if user exists and password is correct
-      if (user.length === 0) throw new TRPCError({ code: "UNAUTHORIZED", message: "Kredensial tidak valid" });
-      if (await verify(user[0]!.password, input.password) === false) throw new TRPCError({ code: "UNAUTHORIZED", message: "Kredensial tidak valid" });
+        // Check if user exists and password is correct
+        if (user.length === 0) throw new TRPCError({ code: "UNAUTHORIZED", message: "Kredensial tidak valid" });
+        if (await verify(user[0]!.password, input.password) === false) throw new TRPCError({ code: "UNAUTHORIZED", message: "Kredensial tidak valid" });
 
-      ctx.cookies.set("session", jwt.sign({ id: user[0]!.id }), { httpOnly: true });
+        ctx.cookies.set("session", jwt.sign({ id: user[0]!.id }), { httpOnly: true });
 
-      return { name: user[0]!.name };
+        return { name: user[0]!.name };
+      }
+      catch (error) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: (error as Error).message });
+        console.error(`[SESSION_CREATE]: ${(error as Error).message}`);
+      }
     }),
 
   read: protectedProcedure
