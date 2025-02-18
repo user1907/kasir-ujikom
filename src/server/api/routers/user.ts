@@ -1,7 +1,7 @@
 import { UserUpdateSchema } from "@/schemas";
 import { adminProcedure, createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { users } from "@/server/db/schema";
+import { users, usersSchema } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { hash } from "@node-rs/argon2";
 
@@ -42,6 +42,17 @@ export const userRouter = createTRPCRouter({
         });
     }),
 
+  delete: adminProcedure
+    .input(usersSchema.pick({ id: true }))
+    .mutation(async ({ input, ctx }) => {
+      return ctx.db
+        .delete(users)
+        .where(eq(users.id, input.id))
+        .returning({
+          id: users.id
+        });
+    }),
+
   list: adminProcedure
     .query(async ({ ctx }) => {
       try {
@@ -57,8 +68,8 @@ export const userRouter = createTRPCRouter({
         return userList;
       }
       catch (error) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: (error as Error).message });
         console.error(`[USER_LIST]: ${(error as Error).message}`);
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: (error as Error).message });
       }
     })
 });
