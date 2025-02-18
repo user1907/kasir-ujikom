@@ -1,97 +1,53 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { api } from "@/trpc/react";
-import { useEffect, useState } from "react";
-import { useBreadcrumb } from "@/components/providers/breadcrumb";
-import { DataTable, DataTableColumnHeader } from "@/components/data-table";
-import { type ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Ellipsis, Edit3Icon, TrashIcon, ChevronsUpDown, Command, Check } from "lucide-react";
-import { cn, type AssertNotUndefined, type QueryResultType } from "@/lib/utils";
-import { useDialog } from "@/components/providers/dialog";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { type FieldValues, type ControllerRenderProps, type UseFormReturn, type PathValue, type Path } from "react-hook-form";
-import { useForm } from "react-hook-form";
-import { UserCreateSchema, UserUpdateSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Check, ChevronsUpDown, Edit3Icon, Ellipsis, TrashIcon } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { type z } from "zod";
+import { type AssertNotUndefined, cn, type QueryResultType } from "@/lib/utils";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList
+} from "@/components/ui/command";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { UserCreateSchema, UserUpdateSchema } from "@/schemas";
+import { useBreadcrumb } from "@/components/providers/breadcrumb";
+import { useEffect, useState } from "react";
+import { api } from "@/trpc/react";
+import { useDialog } from "@/components/providers/dialog";
 import { toast } from "sonner";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { type ColumnDef } from "@tanstack/react-table";
+import { DataTable, DataTableColumnHeader } from "@/components/data-table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { userLevel } from "@/server/db/schema";
-import { CommandEmpty, CommandGroup, CommandList } from "@/components/ui/command";
-import { CommandItem } from "cmdk";
-
-function UserLevelsSelection<T extends FieldValues>({ field, form }: { field: ControllerRenderProps<T>, form: UseFormReturn<T> }) {
-  const languages = [
-    { label: "English", value: "en" },
-    { label: "French", value: "fr" },
-    { label: "German", value: "de" },
-    { label: "Spanish", value: "es" },
-    { label: "Portuguese", value: "pt" },
-    { label: "Russian", value: "ru" },
-    { label: "Japanese", value: "ja" },
-    { label: "Korean", value: "ko" },
-    { label: "Chinese", value: "zh" }
-  ] as const;
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <FormControl>
-          <Button
-            variant="outline"
-            role="combobox"
-            className={cn(
-              "w-[200px] justify-between",
-              !field.value && "text-muted-foreground"
-            )}
-          >
-            {field.value
-              ? languages.find(
-                language => language.value === field.value
-              )?.label
-              : "Select language"}
-            <ChevronsUpDown className="opacity-50" />
-          </Button>
-        </FormControl>
-      </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
-        <Command>
-          <CommandList>
-            <CommandEmpty>No framework found.</CommandEmpty>
-            <CommandGroup>
-              {languages.map(language => (
-                <CommandItem
-                  value={language.label}
-                  key={language.value}
-                  onSelect={() => {
-                    form.setValue(field.name, language.value as PathValue<T, Path<T>>);
-                  }}
-                >
-                  {language.label}
-                  <Check
-                    className={cn(
-                      "ml-auto",
-                      language.value === field.value
-                        ? "opacity-100"
-                        : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-}
+import { Badge } from "@/components/ui/badge";
 
 export default function UserManagement() {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -118,13 +74,7 @@ export default function UserManagement() {
     }
   });
   const createUserForm = useForm<z.infer<typeof UserCreateSchema>>({
-    resolver: zodResolver(UserCreateSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-      name: "",
-      level: "user"
-    }
+    resolver: zodResolver(UserCreateSchema)
   });
   const updateDialog = useDialog();
   const updateUserForm = useForm<z.infer<typeof UserUpdateSchema>>({
@@ -293,7 +243,55 @@ export default function UserManagement() {
                       <FormLabel>
                         Level
                       </FormLabel>
-                      <UserLevelsSelection field={field} form={createUserForm} />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className={cn(
+                                "w-[200px] justify-between",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value
+                                ? userLevel.enumValues.find(
+                                    level => level === field.value
+                                  )
+                                : "Pilih level user"}
+                              <ChevronsUpDown className="opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0">
+                          <Command>
+                            <CommandList>
+                              <CommandEmpty>No framework found.</CommandEmpty>
+                              <CommandGroup>
+                                {userLevel.enumValues.map(level => (
+                                  <CommandItem
+                                    value={level}
+                                    key={level}
+                                    onSelect={() => {
+                                      console.log(level);
+                                    }}
+                                  >
+                                    {level}
+                                    <Check
+                                      className={cn(
+                                        "ml-auto",
+                                        level === field.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   );

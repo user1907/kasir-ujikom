@@ -5,13 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { UserUpdateSchema } from "@/schemas";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod";
+import { userLevel } from "@/server/db/schema";
+import { cn } from "@/lib/utils";
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
 
 export default function Profile() {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -104,9 +109,40 @@ export default function Profile() {
                   <FormLabel>
                     Level
                   </FormLabel>
-                  <FormControl>
-                    <Input disabled={true} {...field} />
-                  </FormControl>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button variant="outline" role="combobox" className={cn("w-full justify-between", !field.value && "text-muted-foreground")}>
+                          {field.value ? userLevel.enumValues.find(v => v === field.value) : "Select level"}
+                          <ChevronsUpDown className="opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-0">
+                      <Command>
+                        <CommandList>
+                          <CommandEmpty>Invalid user level</CommandEmpty>
+                          <CommandGroup>
+                            {userLevel.enumValues.map(level => (
+                              <CommandItem
+                                value={level}
+                                key={level}
+                                onSelect={() => {
+                                  form.setValue("level", level);
+                                }}
+                                className="flex items-center justify-between px-4 py-2"
+                              >
+                                <span>{level}</span>
+                                <Check
+                                  className={cn("ml-2", level === field.value ? "opacity-100" : "opacity-0")}
+                                />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
