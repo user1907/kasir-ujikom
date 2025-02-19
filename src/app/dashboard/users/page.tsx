@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, ChevronsUpDown, Edit3Icon, Ellipsis, TrashIcon } from "lucide-react";
 import { type ControllerRenderProps, type FieldValues, type Path, type PathValue, useForm, type UseFormReturn } from "react-hook-form";
 import { type z } from "zod";
-import { type AssertNotUndefined, cn, type QueryResultType } from "@/lib/utils";
+import { type AssertNotUndefined, cn, type InferQueryResult } from "@/lib/utils";
 import {
   Command,
   CommandEmpty,
@@ -113,7 +113,7 @@ export default function UserManagement() {
   }, [setBreadcrumbs]);
 
   const users = api.user.list.useQuery();
-  type User = AssertNotUndefined<QueryResultType<typeof users>>[0];
+  type User = AssertNotUndefined<InferQueryResult<typeof users>>[0];
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const createDialog = useDialog();

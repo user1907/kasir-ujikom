@@ -11,4 +11,4 @@ export type AssertNotUndefined<T> = T extends undefined ? never : T;
 export type InferQueryOutput<TQuery> = TQuery extends ProcedureUseQuery<infer R> ? R["output"] : never;
 export type InferQueryInput<TQuery> = TQuery extends ProcedureUseQuery<infer R> ? R["input"] : never;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type QueryResultType<TQueryResult> = TQueryResult extends { data: any } ? TQueryResult["data"] : never;
+export type InferQueryResult<TQueryResult> = TQueryResult extends { data: any } ? TQueryResult["data"] : never;

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Edit3Icon, Ellipsis } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
-import { type AssertNotUndefined, type QueryResultType } from "@/lib/utils";
+import { type AssertNotUndefined, type InferQueryResult } from "@/lib/utils";
 import {
   Form,
   FormControl,
@@ -44,7 +44,7 @@ export default function UserManagement() {
   }, [setBreadcrumbs]);
 
   const customers = api.customer.list.useQuery();
-  type Customer = AssertNotUndefined<QueryResultType<typeof customers>>[0];
+  type Customer = AssertNotUndefined<InferQueryResult<typeof customers>>[0];
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   const createDialog = useDialog();

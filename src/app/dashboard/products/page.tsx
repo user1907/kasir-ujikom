@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Edit3Icon, Ellipsis, TrashIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
-import { type AssertNotUndefined, type QueryResultType } from "@/lib/utils";
+import { type AssertNotUndefined, type InferQueryResult } from "@/lib/utils";
 import {
   Form,
   FormControl,
@@ -46,7 +46,7 @@ export default function UserManagement() {
   }, [setBreadcrumbs]);
 
   const products = api.product.list.useQuery();
-  type Product = AssertNotUndefined<QueryResultType<typeof products>>[0];
+  type Product = AssertNotUndefined<InferQueryResult<typeof products>>[0];
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const createDialog = useDialog();
