@@ -35,15 +35,16 @@ export const userRouter = createTRPCRouter({
   update: protectedProcedure
     .input(UserUpdateSchema)
     .mutation(async ({ input, ctx }) => {
-      const { id, ...payload } = input;
+      const { id, password, ...payload } = input;
 
       if (id !== ctx.user.id && ctx.user.level !== "administrator") throw new TRPCError({ code: "FORBIDDEN", message: "Anda tidak mempunyai izin untuk mengubah user ini!" });
       if (payload.level !== ctx.user.level && ctx.user.level !== "administrator") throw new TRPCError({ code: "FORBIDDEN", message: "Anda tidak mempunyai izin untuk mengubah level user!" });
 
-      const updated: typeof payload & { passwordUpdatedAt?: typeof users.$inferInsert["passwordUpdatedAt"] } = { ...payload };
+      const updated: typeof payload & { password?: typeof input["password"], passwordUpdatedAt?: typeof users.$inferInsert["passwordUpdatedAt"] } = { ...payload };
 
-      if (updated.password !== undefined && updated.password !== "") {
-        updated.password = await hash(updated.password);
+      if (password !== undefined && password !== "") {
+        console.log("Harusnya gak ke update");
+        updated.password = await hash(password);
         // Set passwordUpdatedAt to 1 second ago to force re-authentication
         updated.passwordUpdatedAt = new Date(Date.now() - 1000);
 
