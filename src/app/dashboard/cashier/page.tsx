@@ -1,13 +1,16 @@
 "use client";
 
+import { DataTable, DataTableColumnHeader } from "@/components/data-table";
 import { useBreadcrumb } from "@/components/providers/breadcrumb";
+import { useDialog } from "@/components/providers/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/numberFormat";
+import { type InferQueryResult, type AssertNotUndefined } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { MinusIcon, PlusIcon, Search } from "lucide-react";
@@ -112,133 +115,168 @@ export default function CashierPage() {
     (acc, item) => acc + Number(item.product.price) * item.quantity,
     0
   );
-
   const changeAmount = Math.max(paymentAmount - totalAmount, 0);
 
+  const customerDialog = useDialog();
+  const customerList = api.customer.list.useQuery();
+  type Customer = AssertNotUndefined<InferQueryResult<typeof customerList>>[0];
+  const customerColumns: ColumnDef<Customer>[] = [
+    {
+      accessorKey: "id",
+      header: ({ column }) => (<DataTableColumnHeader column={column} title="ID" />)
+    },
+    {
+      accessorKey: "name",
+      header: ({ column }) => (<DataTableColumnHeader column={column} title="Nama" />)
+    },
+    {
+      accessorKey: "address",
+      header: ({ column }) => (<DataTableColumnHeader column={column} title="Alamat" />)
+    },
+    {
+      accessorKey: "phoneNumber",
+      header: ({ column }) => (<DataTableColumnHeader column={column} title="Nomor Telepon" />)
+    }
+  ];
+
   return (
-    <Card className="flex flex-col h-full" id="main-content">
-      <CardHeader>
-        <CardTitle>Kasir</CardTitle>
-        <CardDescription>Layani pelanggan</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col h-full">
-        <div className="flex flex-row gap-2 h-full">
-          <Card className="w-3/4 h-full" id="product-list">
-            <CardHeader>
-              <CardTitle>Katalog Produk</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="relative flex items-center gap-4 mb-4">
-                <Input
-                  className="pr-10" // extra right padding for the icon
-                  placeholder="Cari produk..."
-                  onChange={e => setNameFilter((e.target as HTMLInputElement).value)}
-                />
-                <Search className="w-5 h-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {products.isLoading
-                  ? renderSkeletons()
-                  : filteredProducts.length
-                    ? filteredProducts.map((product, i) => renderProductCard(product, i))
-                    : null}
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="flex-grow flex flex-col h-full" id="cart">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <span>Keranjang</span>
-                <Button
-                  className="ml-auto"
-                  onClick={() => {
-                    setProductsInCart([]);
-                    setPaymentAmount(0);
-                  }}
-                >
-                  Kosongkan keranjang
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex-grow overflow-auto">
-              <Table className="h-full">
-                <TableHeader>
-                  <TableRow>
-                    <TableCell>Produk</TableCell>
-                    <TableCell>Harga</TableCell>
-                    <TableCell className="text-center">Jumlah</TableCell>
-                    <TableCell>Subtotal</TableCell>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {productsInCart.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{item.product.name}</TableCell>
-                      <TableCell>{formatCurrency(item.product.price)}</TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center">
-                          <Button
-                            variant="ghost"
-                            onClick={() => removeFromCart(item.product)}
-                          >
-                            <MinusIcon />
-                          </Button>
-                          <span className="mx-2">{item.quantity}</span>
-                          <Button
-                            variant="ghost"
-                            onClick={() => addToCart(item.product)}
-                          >
-                            <PlusIcon />
-                          </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell>{formatCurrency((Number(item.product.price) * item.quantity).toString())}</TableCell>
+    <>
+      <Card className="flex flex-col h-full" id="main-content">
+        <CardHeader>
+          <CardTitle>Kasir</CardTitle>
+          <CardDescription>Layani pelanggan</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col h-full">
+          <div className="flex flex-row gap-2 h-full">
+            <Card className="w-3/4 h-full" id="product-list">
+              <CardHeader>
+                <CardTitle>Katalog Produk</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="relative flex items-center gap-4 mb-4">
+                  <Input
+                    className="pr-10" // extra right padding for the icon
+                    placeholder="Cari produk..."
+                    onChange={e => setNameFilter((e.target as HTMLInputElement).value)}
+                  />
+                  <Search className="w-5 h-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {products.isLoading
+                    ? renderSkeletons()
+                    : filteredProducts.length
+                      ? filteredProducts.map((product, i) => renderProductCard(product, i))
+                      : null}
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="flex-grow flex flex-col h-full" id="cart">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <span>Keranjang</span>
+                  <Button
+                    className="ml-auto"
+                    variant="destructive"
+                    onClick={() => {
+                      setProductsInCart([]);
+                      setPaymentAmount(0);
+                    }}
+                  >
+                    Kosongkan keranjang
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex-grow overflow-auto">
+                <Table className="h-full">
+                  <TableHeader>
+                    <TableRow>
+                      <TableCell>Produk</TableCell>
+                      <TableCell>Harga</TableCell>
+                      <TableCell className="text-center">Jumlah</TableCell>
+                      <TableCell>Subtotal</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-            <CardFooter className="w-full mt-auto">
-              <div className="flex flex-col w-full">
-                <div className="flex justify-between w-full">
-                  <span>Total:</span>
-                  <span className="font-semibold">
-                    {formatCurrency(totalAmount.toString())}
-                  </span>
-                </div>
-                <div className="flex justify-between w-full">
-                  <span>Pembayaran:</span>
-                  <span className="font-semibold">
-                    {formatCurrency(paymentAmount.toString())}
-                  </span>
-                </div>
-                {changeAmount > 0 && (
+                  </TableHeader>
+                  <TableBody>
+                    {productsInCart.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{item.product.name}</TableCell>
+                        <TableCell>{formatCurrency(item.product.price)}</TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center">
+                            <Button
+                              variant="ghost"
+                              onClick={() => removeFromCart(item.product)}
+                            >
+                              <MinusIcon />
+                            </Button>
+                            <span className="mx-2">{item.quantity}</span>
+                            <Button
+                              variant="ghost"
+                              onClick={() => addToCart(item.product)}
+                            >
+                              <PlusIcon />
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell>{formatCurrency((Number(item.product.price) * item.quantity).toString())}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+              <CardFooter className="w-full mt-auto">
+                <div className="flex flex-col w-full">
                   <div className="flex justify-between w-full">
-                    <span>Kembalian:</span>
+                    <span>Total:</span>
                     <span className="font-semibold">
-                      {formatCurrency(changeAmount.toString())}
+                      {formatCurrency(totalAmount.toString())}
                     </span>
                   </div>
-                )}
-                <div className="flex space-x-4 w-full mt-3">
-                  <Input
-                    placeholder="Masukkan pembayaran"
-                    className="flex-grow"
-                    type="number"
-                    onChange={e => setPaymentAmount(Number(e.target.value))}
-                  />
-                  <Button
-                    className="flex-shrink-0"
-                    disabled={paymentAmount < totalAmount}
-                  >
-                    Bayar
-                  </Button>
+                  <div className="flex justify-between w-full">
+                    <span>Pembayaran:</span>
+                    <span className="font-semibold">
+                      {formatCurrency(paymentAmount.toString())}
+                    </span>
+                  </div>
+                  {changeAmount > 0 && (
+                    <div className="flex justify-between w-full">
+                      <span>Kembalian:</span>
+                      <span className="font-semibold">
+                        {formatCurrency(changeAmount.toString())}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex space-x-4 w-full mt-3">
+                    <Input
+                      placeholder="Masukkan pembayaran"
+                      className="flex-grow"
+                      type="number"
+                      onChange={e => setPaymentAmount(Number(e.target.value))}
+                    />
+                  </div>
+                  <div className="flex w-full mt-3 gap-2">
+                    <Button className="flex-1" onClick={customerDialog.trigger}>Tambah data pelanggan</Button>
+                    <Button
+                      className="flex-1"
+                      disabled={paymentAmount < totalAmount || totalAmount === 0}
+                    >
+                      Bayar
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </CardFooter>
-          </Card>
-        </div>
-      </CardContent>
-    </Card>
+              </CardFooter>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+      <Dialog {...customerDialog.props}>
+        <DialogHeader>
+          <DialogTitle>Cari pelanggan</DialogTitle>
+        </DialogHeader>
+        <DialogContent>
+          <DataTable columns={customerColumns} data={customerList.data ?? []} isLoading={customerList.isLoading} />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

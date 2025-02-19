@@ -156,8 +156,8 @@ export function DataTablePagination<TData>({
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
-  createDataText: string
-  createDataAction: () => void
+  createDataText?: string
+  createDataAction?: () => void
   isLoading: boolean
 }
 
@@ -202,10 +202,12 @@ export function DataTable<TData, TValue>({
           </div>
         </div>
         <div>
-          <Button onClick={createDataAction}>
-            <Plus />
-            {createDataText}
-          </Button>
+          {createDataAction && createDataText && (
+            <Button onClick={createDataAction}>
+              <Plus />
+              {createDataText}
+            </Button>
+          )}
         </div>
       </div>
       <div className="rounded-md border">
