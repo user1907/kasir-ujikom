@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, ChevronsUpDown, Edit3Icon, Ellipsis, TrashIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { type ControllerRenderProps, type FieldValues, type Path, type PathValue, useForm, type UseFormReturn } from "react-hook-form";
 import { type z } from "zod";
 import { type AssertNotUndefined, cn, type QueryResultType } from "@/lib/utils";
 import {
@@ -49,6 +49,60 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { userLevel } from "@/server/db/schema";
 import { Badge } from "@/components/ui/badge";
 
+function UserLevelSelection<T extends FieldValues>({ field, form }: { field: ControllerRenderProps<T>, form: UseFormReturn<T> }) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <FormControl>
+          <Button
+            variant="outline"
+            role="combobox"
+            className={cn(
+              "w-full justify-between",
+              !field.value && "text-muted-foreground"
+            )}
+          >
+            {field.value
+              ? userLevel.enumValues.find(
+                  level => level === field.value
+                )
+              : "Pilih level user"}
+            <ChevronsUpDown className="opacity-50" />
+          </Button>
+        </FormControl>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0">
+        <Command>
+          <CommandList>
+            <CommandEmpty>No framework found.</CommandEmpty>
+            <CommandGroup>
+              {userLevel.enumValues.map(level => (
+                <CommandItem
+                  value={level}
+                  key={level}
+                  onSelect={() => {
+                    form.setValue(field.name, level as PathValue<T, Path<T>>);
+                  }}
+                >
+                  {level}
+                  <Check
+                    className={cn(
+                      "ml-auto",
+                      level === field.value
+                        ? "opacity-100"
+                        : "opacity-0"
+                    )}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export default function UserManagement() {
   const { setBreadcrumbs } = useBreadcrumb();
   useEffect(() => {
@@ -74,7 +128,13 @@ export default function UserManagement() {
     }
   });
   const createUserForm = useForm<z.infer<typeof UserCreateSchema>>({
-    resolver: zodResolver(UserCreateSchema)
+    resolver: zodResolver(UserCreateSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+      name: "",
+      level: "user"
+    }
   });
   const updateDialog = useDialog();
   const updateUserForm = useForm<z.infer<typeof UserUpdateSchema>>({
@@ -243,55 +303,7 @@ export default function UserManagement() {
                       <FormLabel>
                         Level
                       </FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              className={cn(
-                                "w-[200px] justify-between",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value
-                                ? userLevel.enumValues.find(
-                                    level => level === field.value
-                                  )
-                                : "Pilih level user"}
-                              <ChevronsUpDown className="opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[200px] p-0">
-                          <Command>
-                            <CommandList>
-                              <CommandEmpty>No framework found.</CommandEmpty>
-                              <CommandGroup>
-                                {userLevel.enumValues.map(level => (
-                                  <CommandItem
-                                    value={level}
-                                    key={level}
-                                    onSelect={() => {
-                                      console.log(level);
-                                    }}
-                                  >
-                                    {level}
-                                    <Check
-                                      className={cn(
-                                        "ml-auto",
-                                        level === field.value
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
+                      <UserLevelSelection field={field} form={createUserForm} />
                       <FormMessage />
                     </FormItem>
                   );
