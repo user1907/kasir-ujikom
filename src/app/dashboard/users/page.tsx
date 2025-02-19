@@ -112,7 +112,7 @@ export default function UserManagement() {
     ]);
   }, [setBreadcrumbs]);
 
-  const users = api.user.list.useQuery();
+  const users = api.user.list.useQuery({});
   type User = AssertNotUndefined<QueryResultType<typeof users>>[0];
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
@@ -240,7 +240,7 @@ export default function UserManagement() {
           <CardDescription>Kelola Pegawai yang dapat mengakses aplikasi ini.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="container mx-auto py-10">
+          <div className="container mx-auto">
             <DataTable
               columns={columns}
               data={users.data ?? []}

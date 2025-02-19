@@ -1,7 +1,7 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { date, decimal, integer, pgEnum, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { boolean, date, decimal, integer, pgEnum, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 
 export const userLevel = pgEnum("user_levels", ["administrator", "cashier"]);
@@ -12,7 +12,8 @@ export const users = pgTable("users", {
   username: varchar({ length: 50 }).notNull(),
   password: text().notNull(),
   passwordUpdatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-  level: userLevel().notNull()
+  level: userLevel().notNull(),
+  deleted: boolean().notNull().default(false)
 });
 export const usersSchema = createSelectSchema(users, {
   username: type => type.max(50).regex(/^[a-zA-Z0-9_]+$/, "Username harus berupa huruf, angka, dan underscore"),

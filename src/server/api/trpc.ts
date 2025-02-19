@@ -14,7 +14,7 @@ import { parse, serialize, type SerializeOptions } from "cookie";
 import { db } from "@/server/db";
 import { jwt } from "@/lib/jwt";
 import { users } from "../db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 /**
  * 1. CONTEXT
@@ -150,7 +150,12 @@ export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
     const [user] = await db
       .select()
       .from(users)
-      .where(eq(users.id, session.id));
+      .where(
+        and(
+          eq(users.id, session.id),
+          eq(users.deleted, false)
+        )
+      );
 
     // The user does not exist or the session is invalid
     if (user === undefined) throw new TRPCError({ code: "UNAUTHORIZED", message: "Sesi tidak valid" });

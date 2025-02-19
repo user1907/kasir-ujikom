@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { users, usersSchema } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { verify } from "@node-rs/argon2";
 import { jwt } from "@/lib/jwt";
@@ -14,7 +14,10 @@ export const sessionRouter = createTRPCRouter({
           .select()
           .from(users)
           .where(
-            eq(users.username, input.username)
+            and(
+              eq(users.username, input.username),
+              eq(users.deleted, false)
+            )
           );
 
         // Check if user exists and password is correct

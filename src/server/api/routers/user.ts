@@ -2,9 +2,10 @@ import { UserCreateSchema, UserUpdateSchema } from "@/schemas";
 import { adminProcedure, createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { users, usersSchema } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { hash } from "@node-rs/argon2";
 import { jwt } from "@/lib/jwt";
+import { z } from "zod";
 
 export const userRouter = createTRPCRouter({
   create: adminProcedure
@@ -68,16 +69,23 @@ export const userRouter = createTRPCRouter({
   delete: adminProcedure
     .input(usersSchema.pick({ id: true }))
     .mutation(async ({ input, ctx }) => {
+      const append = `_deleted-${Math.floor(Math.random() * 1000)}`;
+
       return ctx.db
-        .delete(users)
+        .update(users)
+        .set({ deleted: true, username: sql`${users.username} || ${append}` })
         .where(eq(users.id, input.id))
         .returning({
-          id: users.id
+          id: users.id,
+          name: users.name,
+          username: users.username,
+          level: users.level
         });
     }),
 
   list: adminProcedure
-    .query(async ({ ctx }) => {
+    .input(z.object({ includeDeleted: z.boolean().default(false).optional() }))
+    .query(async ({ ctx, input }) => {
       try {
         const userList = await ctx.db
           .select({
@@ -86,7 +94,9 @@ export const userRouter = createTRPCRouter({
             username: users.username,
             level: users.level
           })
-          .from(users);
+          .from(users)
+          .where(eq(users.deleted, input.includeDeleted === true))
+          .orderBy(asc(users.id));
 
         return userList;
       }
