@@ -17,6 +17,7 @@ export const users = pgTable("users", {
   deleted: boolean().notNull().default(false)
 });
 export const usersSchema = createSelectSchema(users, {
+  name: type => type.min(2, "Nama minimal 2 karakter"),
   username: type => type.max(50).regex(/^[a-zA-Z0-9_]+$/, "Username harus berupa huruf, angka, dan underscore"),
   password: type => type.min(8, "Password minimal 8 karakter")
 });
@@ -32,6 +33,7 @@ export const products = pgTable("products", {
   index().using("hash", table.archived)
 ]);
 export const productsSchema = createSelectSchema(products, {
+  name: type => type.min(2, "Nama minimal 2 karakter"),
   price: type => type.min(0, "Harga tidak boleh negatif"),
   stock: z.coerce.number().min(0, "Stok tidak boleh negatif")
 });
@@ -43,6 +45,8 @@ export const customers = pgTable("customers", {
   phoneNumber: varchar({ length: 15 }).notNull()
 });
 export const customersSchema = createSelectSchema(customers, {
+  name: type => type.min(2, "Nama minimal 2 karakter"),
+  address: type => type.min(5, "Alamat minimal 5 karakter"),
   phoneNumber: type => type.regex(/^\+?[0-9]+$/, "Nomor telepon hanya boleh berupa angka")
 });
 
