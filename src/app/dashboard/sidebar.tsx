@@ -1,6 +1,6 @@
 "use client";
 
-import { HandCoins, History, Home, LogOut, User2, Users2, Warehouse } from "lucide-react";
+import { ChartColumn, LogOut, ShoppingCart, User2, Users2, Warehouse } from "lucide-react";
 
 import {
   Sidebar,
@@ -26,35 +26,40 @@ import Link from "next/link";
 // Menu items.
 const items = [
   {
-    title: "Beranda",
-    url: "/dashboard/beranda",
-    icon: Home
-  },
-  {
-    title: "Transaksi",
+    title: "Kasir",
     url: "#",
-    icon: HandCoins
+    icon: ShoppingCart,
+    levels: ["cashier"]
   },
   {
-    title: "Riwayat Transaksi",
+    title: "Transaksi & Pendapatan",
     url: "#",
-    icon: History
+    icon: ChartColumn,
+    levels: ["cashier", "administrator"]
   },
   {
-    title: "Pendataan Barang",
+    title: "Barang",
     url: "#",
-    icon: Warehouse
+    icon: Warehouse,
+    levels: ["cashier", "administrator"]
   },
   {
-    title: "Manajemen Pengguna",
+    title: "Pegawai",
     url: "/dashboard/users",
     icon: Users2,
-    isAdmin: true
+    levels: ["administrator"]
+  },
+  {
+    title: "Pelanggan",
+    url: "/dashboard/customers",
+    icon: Users2,
+    levels: ["cashier", "administrator"]
   },
   {
     title: "Profile",
     url: "/dashboard/profile",
-    icon: User2
+    icon: User2,
+    levels: ["cashier", "administrator"]
   }
 ];
 
@@ -105,16 +110,22 @@ export function AppSidebar() {
           <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.filter(i => i.isAdmin === true ? session.data?.level === "administrator" : true).map(item => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {session.isLoading
+                ? new Array(3).fill(null).map((_, i) => (
+                    <SidebarMenuItem key={i}>
+                      <Skeleton className="h-8 w-full" />
+                    </SidebarMenuItem>
+                  ))
+                : items.filter(i => i.levels.includes(session.data!.level)).map(item => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

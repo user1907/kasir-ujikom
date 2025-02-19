@@ -4,7 +4,7 @@
 import { date, decimal, integer, pgEnum, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 
-export const userLevel = pgEnum("user_levels", ["administrator", "user"]);
+export const userLevel = pgEnum("user_levels", ["administrator", "cashier"]);
 
 export const users = pgTable("users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -37,8 +37,8 @@ export const sales = pgTable("sales", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   date: date().notNull(),
   totalPrice: decimal({ precision: 10, scale: 2 }),
-  customerId: integer().references(() => customers.id, { onDelete: "restrict", onUpdate: "cascade" }),
-  userId: integer().references(() => users.id, { onDelete: "restrict", onUpdate: "cascade" })
+  customerId: integer().references(() => customers.id, { onDelete: "set null", onUpdate: "cascade" }),
+  userId: integer().notNull().references(() => users.id, { onDelete: "restrict", onUpdate: "cascade" })
 });
 
 export const salesDetails = pgTable("sales_details", {
