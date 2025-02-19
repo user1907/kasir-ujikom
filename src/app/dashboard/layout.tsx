@@ -1,6 +1,6 @@
 "use client";
 
-import { AppSidebar } from "@/components/sidebar";
+import { AppSidebar } from "@/app/dashboard/sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useTheme } from "next-themes";
 import Cookies from "js-cookie";

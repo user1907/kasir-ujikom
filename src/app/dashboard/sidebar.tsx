@@ -18,9 +18,9 @@ import {
 import Image from "next/image";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
-import { Skeleton } from "./ui/skeleton";
-import { Button } from "./ui/button";
-import { Avatar, AvatarImage } from "./ui/avatar";
+import { Skeleton } from "../../components/ui/skeleton";
+import { Button } from "../../components/ui/button";
+import { Avatar, AvatarImage } from "../../components/ui/avatar";
 import Link from "next/link";
 
 // Menu items.
