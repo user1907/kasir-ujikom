@@ -112,7 +112,7 @@ export default function Profile() {
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
-                        <Button variant="outline" role="combobox" className={cn("w-full justify-between", !field.value && "text-muted-foreground")}>
+                        <Button disabled={true} variant="outline" role="combobox" className={cn("w-full justify-between", !field.value && "text-muted-foreground")}>
                           {field.value ? userLevel.enumValues.find(v => v === field.value) : "Select level"}
                           <ChevronsUpDown className="opacity-50" />
                         </Button>
