@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartColumn, Home, LogOut, ShoppingCart, User2, Users2, Warehouse } from "lucide-react";
+import { ChartColumn, Home, IdCard, LogOut, ShoppingCart, User2, Users2, Warehouse } from "lucide-react";
 
 import {
   Sidebar,
@@ -53,7 +53,7 @@ const items = [
   {
     title: "Pegawai",
     url: "/dashboard/users",
-    icon: Users2,
+    icon: IdCard,
     levels: ["administrator"]
   },
   {
