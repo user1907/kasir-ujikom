@@ -45,7 +45,7 @@ const items = [
     levels: ["cashier", "administrator"]
   },
   {
-    title: "Barang",
+    title: "Produk",
     url: "/dashboard/products",
     icon: Warehouse,
     levels: ["cashier", "administrator"]
