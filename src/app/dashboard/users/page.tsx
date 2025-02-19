@@ -121,7 +121,7 @@ export default function UserManagement() {
     async onSuccess() {
       await users.refetch();
       createDialog.dismiss();
-      toast.success("Pengguna berhasil ditambahkan!");
+      toast.success("Pegawai berhasil ditambahkan!");
     },
     onError(error) {
       toast.error(error.message);
@@ -150,7 +150,7 @@ export default function UserManagement() {
     async onSuccess() {
       await users.refetch();
       updateDialog.dismiss();
-      toast.success("Pengguna berhasil diupdate!");
+      toast.success("Pegawai berhasil diupdate!");
     },
     onError(error) {
       toast.error(error.message);
@@ -160,7 +160,7 @@ export default function UserManagement() {
     async onSuccess() {
       await users.refetch();
       deleteDialog.dismiss();
-      toast.success("Pengguna berhasil dihapus!");
+      toast.success("Pegawai berhasil dihapus!");
     },
     onError(error) {
       toast.error(error.message);
@@ -236,8 +236,8 @@ export default function UserManagement() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Manajemen Pengguna</CardTitle>
-          <CardDescription>Kelola pengguna yang dapat mengakses aplikasi ini.</CardDescription>
+          <CardTitle>Manajemen Pegawai</CardTitle>
+          <CardDescription>Kelola Pegawai yang dapat mengakses aplikasi ini.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="container mx-auto py-10">
@@ -245,8 +245,11 @@ export default function UserManagement() {
               columns={columns}
               data={users.data ?? []}
               isLoading={users.isLoading}
-              createDataText="Tambah Pengguna"
-              createDataAction={createDialog.trigger}
+              createDataText="Tambah Pegawai"
+              createDataAction={() => {
+                createUserForm.reset();
+                createDialog.trigger();
+              }}
             />
           </div>
         </CardContent>
@@ -255,9 +258,9 @@ export default function UserManagement() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Buat pengguna baru
+              Buat Pegawai baru
             </DialogTitle>
-            <DialogDescription>Isi detail pengguna baru yang akan ditambahkan ke sistem.</DialogDescription>
+            <DialogDescription>Isi detail Pegawai baru yang akan ditambahkan ke sistem.</DialogDescription>
           </DialogHeader>
           <Form {...createUserForm}>
             <form onSubmit={createUserForm.handleSubmit(data => createUser(data))} className="space-y-4">
@@ -332,9 +335,9 @@ export default function UserManagement() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Ubah data pengguna
+              Ubah data Pegawai
             </DialogTitle>
-            <DialogDescription>Ubah data pengguna yang diinginkan untuk disimpan</DialogDescription>
+            <DialogDescription>Ubah data Pegawai yang diinginkan untuk disimpan</DialogDescription>
           </DialogHeader>
           <Form {...updateUserForm}>
             <form onSubmit={updateUserForm.handleSubmit(data => updateUser({ ...data, id: selectedUser!.id }))} className="space-y-4">
@@ -408,9 +411,9 @@ export default function UserManagement() {
       <AlertDialog {...deleteDialog.props}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus pengguna</AlertDialogTitle>
+            <AlertDialogTitle>Hapus Pegawai</AlertDialogTitle>
             <AlertDialogDescription>
-              Apa kamu yakin ingin menghapus pengguna
+              Apa kamu yakin ingin menghapus Pegawai
               {" "}
               {selectedUser?.name}
               ?

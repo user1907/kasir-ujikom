@@ -32,6 +32,9 @@ export const customers = pgTable("customers", {
   address: text().notNull(),
   phoneNumber: varchar({ length: 15 }).notNull()
 });
+export const customersSchema = createSelectSchema(customers, {
+  phoneNumber: type => type.regex(/^\+?[0-9]+$/, "Nomor telepon hanya boleh berupa angka")
+});
 
 export const sales = pgTable("sales", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
