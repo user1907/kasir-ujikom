@@ -23,7 +23,7 @@ import {
   DialogTitle
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { CustomerCreateSchema, CustomerUpdateSchema, ProductCreateSchema, ProductUpdateSchema } from "@/schemas";
+import { ProductCreateSchema, ProductUpdateSchema } from "@/schemas";
 import { useBreadcrumb } from "@/components/providers/breadcrumb";
 import { useEffect, useState } from "react";
 import { api } from "@/trpc/react";
@@ -33,7 +33,6 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { DataTable, DataTableColumnHeader } from "@/components/data-table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { formatCurrency } from "@/lib/numberFormat";
 
 export default function UserManagement() {
