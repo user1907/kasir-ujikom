@@ -49,15 +49,15 @@ export const customersSchema = createSelectSchema(customers, {
 export const sales = pgTable("sales", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   date: date().notNull(),
-  totalPrice: decimal({ precision: 10, scale: 2 }),
+  totalPrice: decimal({ precision: 16, scale: 0 }).notNull(),
   customerId: integer().references(() => customers.id, { onDelete: "set null", onUpdate: "cascade" }),
   userId: integer().notNull().references(() => users.id, { onDelete: "restrict", onUpdate: "cascade" })
 });
 
 export const salesDetails = pgTable("sales_details", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  salesId: integer().references(() => sales.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  productId: integer().references(() => products.id, { onDelete: "restrict", onUpdate: "cascade" }),
+  salesId: integer().notNull().references(() => sales.id, { onDelete: "cascade", onUpdate: "cascade" }),
+  productId: integer().notNull().references(() => products.id, { onDelete: "restrict", onUpdate: "cascade" }),
   amount: integer().notNull(),
-  subTotal: decimal({ precision: 10, scale: 2 }).notNull()
+  subTotal: decimal({ precision: 16, scale: 0 }).notNull()
 });
