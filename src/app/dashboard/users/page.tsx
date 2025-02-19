@@ -208,11 +208,8 @@ export default function UserManagement() {
                 className="flex items-center gap-2"
                 onClick={() => {
                   setSelectedUser(ctx.row.original);
-                // updateUserForm.reset({
-                //   name: ctx.row.original.name,
-                //   password: ""
-                // });
-                // updateDialog.trigger();
+                  updateUserForm.reset(ctx.row.original);
+                  updateDialog.trigger();
                 }}
               >
                 <Edit3Icon />
@@ -311,6 +308,83 @@ export default function UserManagement() {
               />
               <FormField
                 control={createUserForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Password
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button type="submit">Simpan</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      <Dialog {...updateDialog.props}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Ubah data pengguna
+            </DialogTitle>
+            <DialogDescription>Ubah data pengguna yang diinginkan untuk disimpan</DialogDescription>
+          </DialogHeader>
+          <Form {...updateUserForm}>
+            <form onSubmit={updateUserForm.handleSubmit(data => updateUser({ ...data, id: selectedUser!.id }))} className="space-y-4">
+              <FormField
+                control={updateUserForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Nama
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={updateUserForm.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Username
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={updateUserForm.control}
+                name="level"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>
+                        Level
+                      </FormLabel>
+                      <UserLevelSelection field={field} form={updateUserForm} />
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <FormField
+                control={updateUserForm.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>

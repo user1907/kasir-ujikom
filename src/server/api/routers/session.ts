@@ -26,8 +26,8 @@ export const sessionRouter = createTRPCRouter({
         return { name: user[0]!.name };
       }
       catch (error) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: (error as Error).message });
         console.error(`[SESSION_CREATE]: ${(error as Error).message}`);
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: (error as Error).message });
       }
     }),
 

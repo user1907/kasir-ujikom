@@ -70,7 +70,7 @@ export default function Profile() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(data => updateUser(data))} className="space-y-4">
+          <form onSubmit={form.handleSubmit(data => updateUser({ ...data, id: currentUser.data!.id, level: currentUser.data!.level }))} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
@@ -162,7 +162,7 @@ export default function Profile() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Simpan</Button>
+            <Button disabled={currentUser.isLoading} type="submit">Simpan</Button>
           </form>
         </Form>
       </CardContent>

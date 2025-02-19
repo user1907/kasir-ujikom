@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { users, usersSchema } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { hash } from "@node-rs/argon2";
+import { jwt } from "@/lib/jwt";
 
 export const userRouter = createTRPCRouter({
   create: adminProcedure
@@ -40,9 +41,15 @@ export const userRouter = createTRPCRouter({
 
       const updated: typeof payload & { passwordUpdatedAt?: typeof users.$inferInsert["passwordUpdatedAt"] } = { ...payload };
 
-      if (updated.password !== undefined) {
+      if (updated.password !== undefined && updated.password !== "") {
         updated.password = await hash(updated.password);
-        updated.passwordUpdatedAt = new Date();
+        // Set passwordUpdatedAt to 1 second ago to force re-authentication
+        updated.passwordUpdatedAt = new Date(Date.now() - 1000);
+
+        // If user is updating their own password, we need to re-authenticate them
+        if (id === ctx.user.id) {
+          ctx.cookies.set("session", jwt.sign({ id }), { httpOnly: true });
+        }
       }
 
       return ctx.db
