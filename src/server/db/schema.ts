@@ -1,8 +1,9 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { boolean, date, decimal, integer, pgEnum, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { boolean, date, decimal, index, integer, pgEnum, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const userLevel = pgEnum("user_levels", ["administrator", "cashier"]);
 
@@ -23,8 +24,16 @@ export const usersSchema = createSelectSchema(users, {
 export const products = pgTable("products", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar({ length: 255 }).notNull(),
-  price: decimal({ precision: 10, scale: 2 }).notNull(),
-  stock: integer().notNull()
+  price: decimal({ precision: 16, scale: 0 }).notNull(),
+  stock: integer().notNull(),
+  archived: boolean().notNull().default(false)
+}, table => [
+  index().using("btree", table.name),
+  index().using("hash", table.archived)
+]);
+export const productsSchema = createSelectSchema(products, {
+  price: type => type.min(0, "Harga tidak boleh negatif"),
+  stock: z.coerce.number().min(0, "Stok tidak boleh negatif")
 });
 
 export const customers = pgTable("customers", {

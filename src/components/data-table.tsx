@@ -192,6 +192,7 @@ export function DataTable<TData, TValue>({
         <div className="flex items-center w-full">
           <div className="relative w-full">
             <Input
+              type="search"
               placeholder="Filter nama..."
               value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
               onChange={event => table.getColumn("name")?.setFilterValue(event.target.value)}

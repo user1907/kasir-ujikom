@@ -208,7 +208,7 @@ export default function UserManagement() {
                       Nomor telepon
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="tel" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -270,7 +270,7 @@ export default function UserManagement() {
                       Nomor telepon
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="tel" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

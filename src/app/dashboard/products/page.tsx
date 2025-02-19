@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Edit3Icon, Ellipsis } from "lucide-react";
+import { Edit3Icon, Ellipsis, TrashIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
 import { type AssertNotUndefined, type QueryResultType } from "@/lib/utils";
@@ -23,7 +23,7 @@ import {
   DialogTitle
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { CustomerCreateSchema, CustomerUpdateSchema } from "@/schemas";
+import { CustomerCreateSchema, CustomerUpdateSchema, ProductCreateSchema, ProductUpdateSchema } from "@/schemas";
 import { useBreadcrumb } from "@/components/providers/breadcrumb";
 import { useEffect, useState } from "react";
 import { api } from "@/trpc/react";
@@ -33,60 +33,74 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { DataTable, DataTableColumnHeader } from "@/components/data-table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { formatCurrency } from "@/lib/numberFormat";
 
 export default function UserManagement() {
   const { setBreadcrumbs } = useBreadcrumb();
   useEffect(() => {
     setBreadcrumbs([
       { label: "Beranda", href: "/dashboard" },
-      { label: "Pelanggan", href: "/dashboard/customers" }
+      { label: "Produk", href: "/dashboard/products" }
     ]);
   }, [setBreadcrumbs]);
 
-  const customers = api.customer.list.useQuery();
-  type Customer = AssertNotUndefined<QueryResultType<typeof customers>>[0];
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const products = api.product.list.useQuery({ includeArchived: true });
+  type Product = AssertNotUndefined<QueryResultType<typeof products>>[0];
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const createDialog = useDialog();
-  const { mutate: createCustomer } = api.customer.create.useMutation({
+  const { mutate: createProduct } = api.product.create.useMutation({
     async onSuccess() {
-      await customers.refetch();
+      await products.refetch();
       createDialog.dismiss();
-      toast.success("Pelanggan berhasil ditambahkan!");
+      toast.success("Produk berhasil ditambahkan!");
     },
     onError(error) {
       toast.error(error.message);
     }
   });
-  const createCustomerForm = useForm<z.infer<typeof CustomerCreateSchema>>({
-    resolver: zodResolver(CustomerCreateSchema),
+  const createProductForm = useForm<z.infer<typeof ProductCreateSchema>>({
+    resolver: zodResolver(ProductCreateSchema),
     defaultValues: {
       name: "",
-      address: "",
-      phoneNumber: ""
+      price: "0",
+      stock: 0
     }
   });
   const updateDialog = useDialog();
-  const updateCustomerForm = useForm<z.infer<typeof CustomerUpdateSchema>>({
-    resolver: zodResolver(CustomerUpdateSchema),
+  const updateProductForm = useForm<z.infer<typeof ProductUpdateSchema>>({
+    resolver: zodResolver(ProductUpdateSchema),
     defaultValues: {
       name: "",
-      address: "",
-      phoneNumber: ""
+      price: "0",
+      stock: 0,
+      archived: false
     }
   });
-  const { mutate: updateCustomer } = api.customer.update.useMutation({
+  const { mutate: updateProduct } = api.product.update.useMutation({
     async onSuccess() {
-      await customers.refetch();
+      await products.refetch();
       updateDialog.dismiss();
-      toast.success("Pelanggan berhasil diupdate!");
+      toast.success("Produk berhasil diupdate!");
     },
     onError(error) {
       toast.error(error.message);
     }
   });
+  const { mutate: deleteProduct } = api.product.delete.useMutation({
+    async onSuccess() {
+      await products.refetch();
+      deleteDialog.dismiss();
+      toast.success("Produk berhasil diarsipkan!");
+    },
+    onError(error) {
+      toast.error(error.message);
+    }
+  });
+  const deleteDialog = useDialog();
 
-  const columns: ColumnDef<Customer>[] = [
+  const columns: ColumnDef<Product>[] = [
     {
       accessorKey: "id",
       header: ({ column }) => (<DataTableColumnHeader column={column} title="ID" />)
@@ -96,12 +110,17 @@ export default function UserManagement() {
       header: ({ column }) => (<DataTableColumnHeader column={column} title="Nama" />)
     },
     {
-      accessorKey: "address",
-      header: ({ column }) => (<DataTableColumnHeader column={column} title="Alamat" />)
+      accessorKey: "price",
+      header: ({ column }) => (<DataTableColumnHeader column={column} title="Harga" />),
+      cell: ({ row }) => formatCurrency(row.original.price)
     },
     {
-      accessorKey: "phoneNumber",
-      header: ({ column }) => (<DataTableColumnHeader column={column} title="Nomor Telepon" />)
+      accessorKey: "stock",
+      header: ({ column }) => (<DataTableColumnHeader column={column} title="Stok" />)
+    },
+    {
+      accessorKey: "archived",
+      header: ({ column }) => (<DataTableColumnHeader column={column} title="Di Arsip?" />)
     },
     {
       id: "actions",
@@ -122,13 +141,23 @@ export default function UserManagement() {
               <DropdownMenuItem
                 className="flex items-center gap-2"
                 onClick={() => {
-                  setSelectedCustomer(ctx.row.original);
-                  updateCustomerForm.reset(ctx.row.original);
+                  setSelectedProduct(ctx.row.original);
+                  updateProductForm.reset(ctx.row.original);
                   updateDialog.trigger();
                 }}
               >
                 <Edit3Icon />
                 Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex items-center gap-2 text-red-600"
+                onClick={() => {
+                  setSelectedProduct(ctx.row.original);
+                  deleteDialog.trigger();
+                }}
+              >
+                <TrashIcon />
+                Arsip
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -141,18 +170,18 @@ export default function UserManagement() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Manajemen Pelanggan</CardTitle>
-          <CardDescription>Kelola pelanggan toko</CardDescription>
+          <CardTitle>Manajemen Produk</CardTitle>
+          <CardDescription>Kelola produk toko</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="container mx-auto">
             <DataTable
               columns={columns}
-              data={customers.data ?? []}
-              isLoading={customers.isLoading}
-              createDataText="Tambah Pelanggan"
+              data={products.data ?? []}
+              isLoading={products.isLoading}
+              createDataText="Tambah Produk"
               createDataAction={() => {
-                createCustomerForm.reset();
+                createProductForm.reset();
                 createDialog.trigger();
               }}
             />
@@ -163,14 +192,14 @@ export default function UserManagement() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Buat pelanggan baru
+              Buat produk baru
             </DialogTitle>
-            <DialogDescription>Isi detail pelanggan baru yang akan ditambahkan ke sistem.</DialogDescription>
+            <DialogDescription>Isi detail produk baru yang akan ditambahkan ke sistem.</DialogDescription>
           </DialogHeader>
-          <Form {...createCustomerForm}>
-            <form onSubmit={createCustomerForm.handleSubmit(data => createCustomer(data))} className="space-y-4">
+          <Form {...createProductForm}>
+            <form onSubmit={createProductForm.handleSubmit(data => createProduct(data))} className="space-y-4">
               <FormField
-                control={createCustomerForm.control}
+                control={createProductForm.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
@@ -185,30 +214,37 @@ export default function UserManagement() {
                 )}
               />
               <FormField
-                control={createCustomerForm.control}
-                name="address"
+                control={createProductForm.control}
+                name="price"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Alamat
+                      Harga
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sm">Rp.</span>
+                        <Input
+                          type="number"
+                          {...field}
+                          className="pl-10" // Adjust padding to make space for the prefix
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
-                control={createCustomerForm.control}
-                name="phoneNumber"
+                control={createProductForm.control}
+                name="stock"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Nomor telepon
+                      Stok
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -225,14 +261,14 @@ export default function UserManagement() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Ubah data pelanggan
+              Ubah data produk
             </DialogTitle>
-            <DialogDescription>Ubah data pelanggan yang diinginkan untuk disimpan</DialogDescription>
+            <DialogDescription>Ubah data produk yang diinginkan untuk disimpan</DialogDescription>
           </DialogHeader>
-          <Form {...updateCustomerForm}>
-            <form onSubmit={updateCustomerForm.handleSubmit(data => updateCustomer({ ...data, id: selectedCustomer!.id }))} className="space-y-4">
+          <Form {...updateProductForm}>
+            <form onSubmit={updateProductForm.handleSubmit(data => updateProduct({ ...data, id: selectedProduct!.id }))} className="space-y-4">
               <FormField
-                control={updateCustomerForm.control}
+                control={updateProductForm.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
@@ -247,30 +283,37 @@ export default function UserManagement() {
                 )}
               />
               <FormField
-                control={updateCustomerForm.control}
-                name="address"
+                control={updateProductForm.control}
+                name="price"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Alamat
+                      Harga
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sm">Rp.</span>
+                        <Input
+                          type="number"
+                          {...field}
+                          className="pl-10" // Adjust padding to make space for the prefix
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
-                control={updateCustomerForm.control}
-                name="phoneNumber"
+                control={updateProductForm.control}
+                name="stock"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Nomor telepon
+                      Stok
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
