@@ -112,7 +112,7 @@ export default function UserManagement() {
     ]);
   }, [setBreadcrumbs]);
 
-  const users = api.user.list.useQuery({});
+  const users = api.user.list.useQuery();
   type User = AssertNotUndefined<QueryResultType<typeof users>>[0];
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 

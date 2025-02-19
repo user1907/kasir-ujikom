@@ -2,7 +2,6 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { ProductCreateSchema, ProductUpdateSchema } from "@/schemas";
 import { products, productsSchema } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
 
 export const productRouter = createTRPCRouter({
   create: protectedProcedure
@@ -31,17 +30,16 @@ export const productRouter = createTRPCRouter({
     .mutation(({ input, ctx }) => {
       return ctx.db
         .update(products)
-        .set({ archived: true })
+        .set({ deleted: true })
         .where(eq(products.id, input.id))
         .returning();
     }),
 
   list: protectedProcedure
-    .input(z.object({ includeArchived: z.boolean().optional() }))
-    .query(({ ctx, input }) => {
+    .query(({ ctx }) => {
       return ctx.db
         .select()
         .from(products)
-        .where(input.includeArchived ? undefined : eq(products.archived, false));
+        .where(eq(products.deleted, false));
     })
 });

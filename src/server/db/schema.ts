@@ -27,10 +27,9 @@ export const products = pgTable("products", {
   name: varchar({ length: 255 }).notNull(),
   price: decimal({ precision: 16, scale: 0 }).notNull(),
   stock: integer().notNull(),
-  archived: boolean().notNull().default(false)
+  deleted: boolean().notNull().default(false)
 }, table => [
-  index().using("btree", table.name),
-  index().using("hash", table.archived)
+  index().using("btree", table.name)
 ]);
 export const productsSchema = createSelectSchema(products, {
   name: type => type.min(2, "Nama minimal 2 karakter"),

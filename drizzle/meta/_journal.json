@@ -71,6 +71,13 @@
       "when": 1739974784229,
       "tag": "0009_real_dakota_north",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1739981002549,
+      "tag": "0010_breezy_lionheart",
+      "breakpoints": true
     }
   ]
 }

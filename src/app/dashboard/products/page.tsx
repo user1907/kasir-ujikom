@@ -45,7 +45,7 @@ export default function UserManagement() {
     ]);
   }, [setBreadcrumbs]);
 
-  const products = api.product.list.useQuery({ includeArchived: true });
+  const products = api.product.list.useQuery();
   type Product = AssertNotUndefined<QueryResultType<typeof products>>[0];
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
@@ -74,8 +74,7 @@ export default function UserManagement() {
     defaultValues: {
       name: "",
       price: "0",
-      stock: 0,
-      archived: false
+      stock: 0
     }
   });
   const { mutate: updateProduct } = api.product.update.useMutation({
@@ -117,10 +116,6 @@ export default function UserManagement() {
     {
       accessorKey: "stock",
       header: ({ column }) => (<DataTableColumnHeader column={column} title="Stok" />)
-    },
-    {
-      accessorKey: "archived",
-      header: ({ column }) => (<DataTableColumnHeader column={column} title="Di Arsip?" />)
     },
     {
       id: "actions",

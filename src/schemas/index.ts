@@ -21,5 +21,5 @@ export const CustomerUpdateSchema = customersSchema.pick({ id: true })
 export const ProductCreateSchema = productsSchema.pick({ name: true, price: true, stock: true });
 export const ProductUpdateSchema = customersSchema.pick({ id: true })
   .merge(
-    productsSchema.pick({ name: true, price: true, stock: true, archived: true }).partial()
+    productsSchema.pick({ name: true, price: true, stock: true }).partial()
   );

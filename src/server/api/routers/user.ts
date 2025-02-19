@@ -5,7 +5,6 @@ import { users, usersSchema } from "@/server/db/schema";
 import { asc, eq, sql } from "drizzle-orm";
 import { hash } from "@node-rs/argon2";
 import { jwt } from "@/lib/jwt";
-import { z } from "zod";
 
 export const userRouter = createTRPCRouter({
   create: adminProcedure
@@ -85,8 +84,7 @@ export const userRouter = createTRPCRouter({
     }),
 
   list: adminProcedure
-    .input(z.object({ includeDeleted: z.boolean().default(false).optional() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx }) => {
       try {
         const userList = await ctx.db
           .select({
@@ -96,7 +94,7 @@ export const userRouter = createTRPCRouter({
             level: users.level
           })
           .from(users)
-          .where(eq(users.deleted, input.includeDeleted === true))
+          .where(eq(users.deleted, false))
           .orderBy(asc(users.id));
 
         return userList;
