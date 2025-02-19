@@ -107,8 +107,8 @@ export default function UserManagement() {
   const { setBreadcrumbs } = useBreadcrumb();
   useEffect(() => {
     setBreadcrumbs([
-      { label: "Dashboard", href: "/dashboard" },
-      { label: "Manajemen Pengguna", href: "/dashboard/users" }
+      { label: "Beranda", href: "/dashboard" },
+      { label: "Pegawai", href: "/dashboard/users" }
     ]);
   }, [setBreadcrumbs]);
 

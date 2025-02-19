@@ -22,7 +22,7 @@ export default function Profile() {
   const { setBreadcrumbs } = useBreadcrumb();
   useEffect(() => {
     setBreadcrumbs([
-      { label: "Dashboard", href: "/dashboard" },
+      { label: "Beranda", href: "/dashboard" },
       { label: "Profile", href: "/dashboard/profile" }
     ]);
   }, [setBreadcrumbs]);

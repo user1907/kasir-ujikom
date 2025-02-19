@@ -51,16 +51,16 @@ const items = [
     levels: ["cashier", "administrator"]
   },
   {
-    title: "Pegawai",
-    url: "/dashboard/users",
-    icon: IdCard,
-    levels: ["administrator"]
-  },
-  {
     title: "Pelanggan",
     url: "/dashboard/customers",
     icon: Users2,
     levels: ["cashier", "administrator"]
+  },
+  {
+    title: "Pegawai",
+    url: "/dashboard/users",
+    icon: IdCard,
+    levels: ["administrator"]
   },
   {
     title: "Profile",
