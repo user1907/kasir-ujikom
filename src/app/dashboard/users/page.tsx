@@ -266,21 +266,6 @@ export default function UserManagement() {
             <form onSubmit={createUserForm.handleSubmit(data => createUser(data))} className="space-y-4">
               <FormField
                 control={createUserForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Nama
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={createUserForm.control}
                 name="username"
                 render={({ field }) => (
                   <FormItem>
@@ -296,12 +281,27 @@ export default function UserManagement() {
               />
               <FormField
                 control={createUserForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Nama
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={createUserForm.control}
                 name="level"
                 render={({ field }) => {
                   return (
                     <FormItem>
                       <FormLabel>
-                        Level
+                        Hak akses
                       </FormLabel>
                       <UserLevelSelection field={field} form={createUserForm} />
                       <FormMessage />
@@ -343,21 +343,6 @@ export default function UserManagement() {
             <form onSubmit={updateUserForm.handleSubmit(data => updateUser({ ...data, id: selectedUser!.id }))} className="space-y-4">
               <FormField
                 control={updateUserForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Nama
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={updateUserForm.control}
                 name="username"
                 render={({ field }) => (
                   <FormItem>
@@ -373,12 +358,27 @@ export default function UserManagement() {
               />
               <FormField
                 control={updateUserForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Nama
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={updateUserForm.control}
                 name="level"
                 render={({ field }) => {
                   return (
                     <FormItem>
                       <FormLabel>
-                        Level
+                        Hak akses
                       </FormLabel>
                       <UserLevelSelection field={field} form={updateUserForm} />
                       <FormMessage />

@@ -73,21 +73,6 @@ export default function Profile() {
           <form onSubmit={form.handleSubmit(data => updateUser({ ...data, id: currentUser.data!.id, level: currentUser.data!.level }))} className="space-y-4">
             <FormField
               control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Nama
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="username"
               render={({ field }) => (
                 <FormItem>
@@ -103,11 +88,26 @@ export default function Profile() {
             />
             <FormField
               control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Nama
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="level"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Level
+                    Hak akses
                   </FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
