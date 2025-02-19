@@ -34,6 +34,7 @@ import { DataTable, DataTableColumnHeader } from "@/components/data-table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/numberFormat";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export default function UserManagement() {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -325,6 +326,24 @@ export default function UserManagement() {
           </Form>
         </DialogContent>
       </Dialog>
+      <AlertDialog {...deleteDialog.props}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Arsip Pegawai</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apa kamu yakin ingin mengarsip Produk
+              {" "}
+              {selectedProduct?.name}
+              ?
+              {" "}
+            </AlertDialogDescription>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Batal</AlertDialogCancel>
+              <AlertDialogAction onClick={() => deleteProduct({ id: selectedProduct!.id })}>Arsip</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogHeader>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

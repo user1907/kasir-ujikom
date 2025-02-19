@@ -420,8 +420,8 @@ export default function UserManagement() {
               {" "}
             </AlertDialogDescription>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => deleteUser({ id: selectedUser!.id })}>Delete</AlertDialogAction>
+              <AlertDialogCancel>Batal</AlertDialogCancel>
+              <AlertDialogAction onClick={() => deleteUser({ id: selectedUser!.id })}>Hapus</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogHeader>
         </AlertDialogContent>
