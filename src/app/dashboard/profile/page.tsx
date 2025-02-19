@@ -44,7 +44,7 @@ export default function Profile() {
       name: "",
       username: "",
       password: "",
-      level: "user"
+      level: "cashier"
     }
   });
 

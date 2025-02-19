@@ -133,7 +133,7 @@ export default function UserManagement() {
       username: "",
       password: "",
       name: "",
-      level: "user"
+      level: "cashier"
     }
   });
   const updateDialog = useDialog();
@@ -143,7 +143,7 @@ export default function UserManagement() {
       username: "",
       password: "",
       name: "",
-      level: "user"
+      level: "cashier"
     }
   });
   const { mutate: updateUser } = api.user.update.useMutation({

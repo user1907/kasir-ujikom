@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartColumn, LogOut, ShoppingCart, User2, Users2, Warehouse } from "lucide-react";
+import { ChartColumn, Home, LogOut, ShoppingCart, User2, Users2, Warehouse } from "lucide-react";
 
 import {
   Sidebar,
@@ -22,24 +22,31 @@ import { Skeleton } from "../../components/ui/skeleton";
 import { Button } from "../../components/ui/button";
 import { Avatar, AvatarImage } from "../../components/ui/avatar";
 import Link from "next/link";
+import { type InferQueryOutput } from "@/lib/utils";
 
 // Menu items.
 const items = [
   {
+    title: "Beranda",
+    url: "/dashboard",
+    icon: Home,
+    levels: ["cashier", "administrator"]
+  },
+  {
     title: "Kasir",
-    url: "#",
+    url: "/dashboard/cashier",
     icon: ShoppingCart,
     levels: ["cashier"]
   },
   {
     title: "Transaksi & Pendapatan",
-    url: "#",
+    url: "/dashboard/transactions",
     icon: ChartColumn,
     levels: ["cashier", "administrator"]
   },
   {
     title: "Barang",
-    url: "#",
+    url: "/dashboard/products",
     icon: Warehouse,
     levels: ["cashier", "administrator"]
   },
@@ -63,14 +70,8 @@ const items = [
   }
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ user, isLoading }: { user: InferQueryOutput<typeof api["session"]["read"]["useQuery"]>, isLoading: boolean }) {
   const { state } = useSidebar();
-
-  const session = api.session.read.useQuery(undefined, {
-    retry: false,
-    staleTime: 1 * 60 * 1000,
-    refetchInterval: 1 * 60 * 1000
-  });
 
   const logout = api.session.delete.useMutation({
     onSuccess() {
@@ -81,12 +82,6 @@ export function AppSidebar() {
       window.location.href = "/";
     }
   });
-
-  if (session.isError) {
-    window.location.href = "/";
-    toast.error("Sesi anda telah berakhir, silahkan login kembali.");
-    return null;
-  }
 
   return (
     <Sidebar
@@ -110,13 +105,13 @@ export function AppSidebar() {
           <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {session.isLoading
+              {isLoading
                 ? new Array(3).fill(null).map((_, i) => (
                     <SidebarMenuItem key={i}>
                       <Skeleton className="h-8 w-full" />
                     </SidebarMenuItem>
                   ))
-                : items.filter(i => i.levels.includes(session.data!.level)).map(item => (
+                : items.filter(i => i.levels.includes(user.level)).map(item => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <Link href={item.url}>
@@ -130,7 +125,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarFooter>
-          {session.isLoading
+          {isLoading
             ? (
                 <div className={`flex ${state === "collapsed" ? "flex-col items-center gap-2" : "items-center gap-2"}`}>
                   <Skeleton className={`${state === "collapsed" ? "h-6 w-6" : "h-8 w-8"} rounded-full`} />
@@ -156,14 +151,14 @@ export function AppSidebar() {
                   <Avatar className={`${state === "collapsed" ? "h-6 w-6" : "h-8 w-8"}`}>
                     <AvatarImage
                       className="h-full w-full rounded-full object-cover"
-                      src={`https://ui-avatars.com/api/?name=${session.data?.name}&size=${
+                      src={`https://ui-avatars.com/api/?name=${user.name}&size=${
                         state === "collapsed" ? 24 : 32
                       }`}
                     />
                   </Avatar>
                   {state === "expanded" && (
                     <span className="truncate max-w-[150px]">
-                      {session.data?.name}
+                      {user.name}
                       {" "}
                     </span>
                   )}

@@ -9,11 +9,18 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from "@/components/ui/button";
 import { Sun, Moon } from "lucide-react";
 import { BreadcrumbDisplay, BreadcrumbProvider } from "@/components/providers/breadcrumb";
+import { api } from "@/trpc/react";
+import { toast } from "sonner";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { setTheme } = useTheme();
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [mounted, setMounted] = useState(false);
+  const session = api.session.read.useQuery(undefined, {
+    retry: false,
+    staleTime: 1 * 60 * 1000,
+    refetchInterval: 1 * 60 * 1000
+  });
 
   useEffect(() => {
     const sidebarCookie = Cookies.get("sidebar_state") === "true";
@@ -26,9 +33,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     return null;
   }
 
+  if (session.isError) {
+    window.location.href = "/";
+    toast.error("Sesi anda telah berakhir, silahkan login kembali.");
+    return null;
+  }
+
   return (
     <SidebarProvider defaultOpen={isSidebarOpen}>
-      <AppSidebar />
+      <AppSidebar user={session.data!} isLoading={session.isLoading} />
       <SidebarInset>
         <BreadcrumbProvider>
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">

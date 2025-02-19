@@ -1,8 +1,7 @@
 "use client";
 
-import { redirect } from "next/navigation";
-
 export default function DashboardRoot() {
-  redirect("/dashboard/beranda");
-  return null;
+  return (
+    <h1>Hello World</h1>
+  );
 }
