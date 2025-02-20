@@ -4,7 +4,7 @@ import { type AssertNotUndefined, type InferQueryResult } from "@/lib/utils";
 import { useBreadcrumb } from "@/components/providers/breadcrumb";
 import { useEffect } from "react";
 import { api } from "@/trpc/react";
-import { toast } from "sonner";
+// import { toast } from "sonner";
 import { type ColumnDef } from "@tanstack/react-table";
 import { DataTable, DataTableColumnHeader } from "@/components/data-table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,13 +24,13 @@ export default function UserManagement() {
 
   const transactions = api.transaction.list.useQuery();
   type Transaction = AssertNotUndefined<InferQueryResult<typeof transactions>>[0];
-  type TransactionDetail = Transaction["details"];
+  // type TransactionDetail = Transaction["details"];
 
-  const transactionDetailColumns: ColumnDef<TransactionDetail>[] = [
-    {
-      accessorKey: "name"
-    }
-  ];
+  // const transactionDetailColumns: ColumnDef<TransactionDetail>[] = [
+  //   {
+  //     accessorKey: "name"
+  //   }
+  // ];
 
   console.log(transactions.data);
 
