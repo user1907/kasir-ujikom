@@ -41,6 +41,8 @@ export const transactionRouter = createTRPCRouter({
           throw new TRPCError({ code: "FORBIDDEN", message: "Total price is not valid" });
         }
 
+        console.log(input);
+
         const [sale] = await trx
           .insert(sales)
           .values({

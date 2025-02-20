@@ -54,19 +54,14 @@ export default function UserManagement() {
       )
     },
     {
-      accessorKey: "totalPrice",
-      header: ({ column }) => (<DataTableColumnHeader column={column} title="Tota harga" />),
-      cell: ({ row }) => formatCurrency(row.original.totalPrice)
+      accessorKey: "user.name",
+      header: ({ column }) => (<DataTableColumnHeader column={column} title="Nama Kasir" />)
     },
     {
       accessorKey: "customer.name",
       id: "customer.name",
-      header: ({ column }) => (<DataTableColumnHeader column={column} title="Pelanggan" />),
+      header: ({ column }) => (<DataTableColumnHeader column={column} title="Nama Pelanggan" />),
       cell: ({ row }) => row.original.customer?.name ?? "N/A"
-    },
-    {
-      accessorKey: "user.name",
-      header: ({ column }) => (<DataTableColumnHeader column={column} title="Kasir" />)
     },
     {
       accessorKey: "details",
@@ -85,25 +80,12 @@ export default function UserManagement() {
           ))}
         </ul>
       )
+    },
+    {
+      accessorKey: "totalPrice",
+      header: ({ column }) => (<DataTableColumnHeader column={column} title="Total harga" />),
+      cell: ({ row }) => formatCurrency(row.original.totalPrice)
     }
-    // {
-    //   accessorKey: "details.name",
-    //   header: ({ column }) => (<DataTableColumnHeader column={column} title="Nama Produk" />)
-    // },
-    // {
-    //   accessorKey: "details.price",
-    //   header: ({ column }) => (<DataTableColumnHeader column={column} title="Harga" />),
-    //   cell: ({ row }) => formatCurrency(row.original.details.price)
-    // },
-    // {
-    //   accessorKey: "details.amount",
-    //   header: ({ column }) => (<DataTableColumnHeader column={column} title="Jumlah" />)
-    // },
-    // {
-    //   accessorKey: "details.subTotal",
-    //   header: ({ column }) => (<DataTableColumnHeader column={column} title="Subtotal" />),
-    //   cell: ({ row }) => formatCurrency(row.original.details.subTotal)
-    // }
   ];
 
   return (

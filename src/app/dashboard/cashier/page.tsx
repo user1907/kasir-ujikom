@@ -3,19 +3,25 @@
 import { DataTable, DataTableColumnHeader } from "@/components/data-table";
 import { useBreadcrumb } from "@/components/providers/breadcrumb";
 import { useDialog } from "@/components/providers/dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/numberFormat";
 import { type InferQueryResult, type AssertNotUndefined } from "@/lib/utils";
+import { CustomerCreateSchema } from "@/schemas";
 import { api } from "@/trpc/react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { type ColumnDef } from "@tanstack/react-table";
 import { MinusIcon, PlusIcon, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { type z } from "zod";
 
 export default function CashierPage() {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -35,9 +41,6 @@ export default function CashierPage() {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [products.data, nameFilter]);
   type Product = typeof filteredProducts[0];
-  const [productsInCart, setProductsInCart] = useState<{ product: Product, quantity: number }[]>([]);
-  const [paymentAmount, setPaymentAmount] = useState<number>(0);
-
   const addToCart = (product: Product) => {
     setProductsInCart((prevCart) => {
       const existingProduct = prevCart.find(item => item.product.id === product.id);
@@ -125,14 +128,18 @@ export default function CashierPage() {
     );
   };
 
+  const [productsInCart, setProductsInCart] = useState<{ product: Product, quantity: number }[]>([]);
+  const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const totalAmount = productsInCart.reduce(
     (acc, item) => acc + Number(item.product.price) * item.quantity,
     0
   );
   const changeAmount = Math.max(paymentAmount - totalAmount, 0);
 
-  const customerDialog = useDialog();
+  // Customer
+  const selectCustomerDialog = useDialog();
   const customerList = api.customer.list.useQuery();
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   type Customer = AssertNotUndefined<InferQueryResult<typeof customerList>>[0];
   const customerColumns: ColumnDef<Customer>[] = [
     {
@@ -150,8 +157,45 @@ export default function CashierPage() {
     {
       accessorKey: "phoneNumber",
       header: ({ column }) => (<DataTableColumnHeader column={column} title="Nomor Telepon" />)
+    },
+    {
+      id: "action",
+      header: ({ column }) => (<DataTableColumnHeader column={column} title="Aksi" />),
+      cell: ({ row }) => (
+        <Button onClick={() => {
+          setSelectedCustomer(row.original);
+          selectCustomerDialog.dismiss();
+        }}
+        >
+          Pilih
+        </Button>
+      )
     }
   ];
+  const createCustomerDialog = useDialog();
+  const { mutate: createCustomer } = api.customer.create.useMutation({
+    async onSuccess() {
+      await customerList.refetch();
+      createCustomerDialog.dismiss();
+      selectCustomerDialog.trigger();
+      toast.success("Pelanggan berhasil ditambahkan!");
+    },
+    onError(error) {
+      toast.error(error.message);
+    }
+  });
+  const createCustomerForm = useForm<z.infer<typeof CustomerCreateSchema>>({
+    resolver: zodResolver(CustomerCreateSchema),
+    defaultValues: {
+      name: "",
+      address: "",
+      phoneNumber: ""
+    }
+  });
+
+  // Dialogs
+  const deleteCartDialog = useDialog();
+  const confirmPaymentDialog = useDialog();
 
   // Pembayaran
   const { mutate: bayar } = api.transaction.create.useMutation({
@@ -204,10 +248,7 @@ export default function CashierPage() {
                   <Button
                     className="ml-auto"
                     variant="destructive"
-                    onClick={() => {
-                      setProductsInCart([]);
-                      setPaymentAmount(0);
-                    }}
+                    onClick={deleteCartDialog.trigger}
                   >
                     Kosongkan keranjang
                   </Button>
@@ -274,24 +315,29 @@ export default function CashierPage() {
                       </span>
                     </div>
                   )}
+                  {selectedCustomer && (
+                    <div className="flex justify-between w-full">
+                      <span>Nama Pelanggan:</span>
+                      <span className="font-semibold">
+                        {selectedCustomer.name}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex space-x-4 w-full mt-3">
                     <Input
                       placeholder="Masukkan pembayaran"
                       className="flex-grow"
                       type="number"
-                      value={paymentAmount}
+                      value={paymentAmount === 0 ? "" : paymentAmount}
                       onChange={e => setPaymentAmount(Number(e.target.value))}
                     />
                   </div>
                   <div className="flex w-full mt-3 gap-2">
-                    <Button className="flex-1" onClick={customerDialog.trigger}>Tautkan pelanggan</Button>
+                    <Button className="flex-1" onClick={selectCustomerDialog.trigger}>Tautkan pelanggan</Button>
                     <Button
                       className="flex-1"
                       disabled={paymentAmount < totalAmount || totalAmount === 0}
-                      onClick={() => bayar({
-                        carts: productsInCart,
-                        totalPrice: totalAmount
-                      })}
+                      onClick={confirmPaymentDialog.trigger}
                     >
                       Bayar
                     </Button>
@@ -302,12 +348,151 @@ export default function CashierPage() {
           </div>
         </CardContent>
       </Card>
-      <Dialog {...customerDialog.props}>
-        <DialogContent>
+      <AlertDialog {...confirmPaymentDialog.props}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Konfirmasi</AlertDialogTitle>
+            <AlertDialogDescription>Konfirmasi pembayaran</AlertDialogDescription>
+          </AlertDialogHeader>
+          <div>
+            <div className="flex justify-between">
+              <span>Total:</span>
+              <span className="font-semibold">{formatCurrency(totalAmount.toString())}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Pembayaran:</span>
+              <span className="font-semibold">{formatCurrency(paymentAmount.toString())}</span>
+            </div>
+            {changeAmount > 0 && (
+              <div className="flex justify-between">
+                <span>Kembalian:</span>
+                <span className="font-semibold">{formatCurrency(changeAmount.toString())}</span>
+              </div>
+            )}
+            {selectedCustomer && (
+              <div className="flex justify-between">
+                <span>Nama Pelanggan:</span>
+                <span className="font-semibold">{selectedCustomer.name}</span>
+              </div>
+            )}
+          </div>
+          <AlertDialogFooter>
+            <Button variant="ghost" onClick={confirmPaymentDialog.dismiss}>Batal</Button>
+            <Button
+              onClick={() => {
+                bayar({
+                  carts: productsInCart,
+                  totalPrice: totalAmount,
+                  customerId: selectedCustomer?.id
+                });
+                confirmPaymentDialog.dismiss();
+              }}
+            >
+              Konfirmasi
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog {...deleteCartDialog.props}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Batal</AlertDialogTitle>
+            <AlertDialogDescription>
+              Anda yakin ingin mengosongkan keranjang?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button variant="ghost" onClick={deleteCartDialog.dismiss}>Tidak</Button>
+            <Button
+              onClick={() => {
+                setProductsInCart([]);
+                setPaymentAmount(0);
+                setSelectedCustomer(null);
+                deleteCartDialog.dismiss();
+              }}
+            >
+              Kosongkan
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <Dialog {...selectCustomerDialog.props}>
+        <DialogContent className="w-full max-w-4xl h-full max-h-[80vh]">
           <DialogHeader>
             <DialogTitle>Cari pelanggan</DialogTitle>
           </DialogHeader>
-          <DataTable columns={customerColumns} createDataAction={() => console.log("action")} createDataText="Tambah pelanggan" data={customerList.data ?? []} isLoading={customerList.isLoading} />
+          <DataTable
+            columns={customerColumns}
+            createDataAction={() => {
+              createCustomerForm.reset();
+              createCustomerDialog.trigger();
+            }}
+            createDataText="Tambah pelanggan"
+            data={customerList.data ?? []}
+            isLoading={customerList.isLoading}
+          />
+        </DialogContent>
+      </Dialog>
+      <Dialog {...createCustomerDialog.props}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Buat pelanggan baru
+            </DialogTitle>
+            <DialogDescription>Isi detail pelanggan baru yang akan ditambahkan ke sistem.</DialogDescription>
+          </DialogHeader>
+          <Form {...createCustomerForm}>
+            <form onSubmit={createCustomerForm.handleSubmit(data => createCustomer(data))} className="space-y-4">
+              <FormField
+                control={createCustomerForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Nama
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={createCustomerForm.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Alamat
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={createCustomerForm.control}
+                name="phoneNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Nomor telepon
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="tel" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button type="submit">Simpan</Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </>
