@@ -72,16 +72,18 @@ export default function CashierPage() {
       {[...Array(8) as void[]].map((_, index) => (
         <Skeleton
           key={index}
-          className="p-4 border rounded-lg shadow-sm min-h-[20vh] w-full flex flex-col justify-between"
+          className="p-4 border rounded-lg shadow-sm min-h-[25vh] flex flex-col justify-between"
         >
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Skeleton className="w-5 h-5" />
               <Skeleton className="w-24 h-5" />
             </div>
-            <Skeleton className="w-full h-4" />
+            <div className="flex flex-col gap-1">
+              <Skeleton className="w-full h-4" />
+              <Skeleton className="w-16 h-4" />
+            </div>
           </div>
-          <Skeleton className="w-32 h-4 mt-2" />
+          <Skeleton className="w-full h-10 mt-4" />
         </Skeleton>
       ))}
     </>
@@ -91,23 +93,28 @@ export default function CashierPage() {
     <div
       key={index}
       className="
-        p-4 border rounded-lg shadow-sm min-h-[20vh] flex flex-col justify-between
+        p-4 border rounded-lg shadow-sm min-h-[25vh] flex flex-col justify-between
       "
     >
-      <div className="flex flex-col flex-grow">
+      <div className="flex flex-col">
         <div className="flex items-center gap-2 mb-2">
-          <span className="font-semibold text-l">{product.name}</span>
-          <span className="text-xl ml-auto">{formatCurrency(product.price)}</span>
+          <span className="font-semibold">{product.name}</span>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span>{formatCurrency(product.price)}</span>
+          <span className="text-sm text-muted-foreground">
+            Stok:
+            {" "}
+            {product.stock}
+          </span>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <span className="text-muted-foreground mt-2">
-          Stok:
-          {" "}
-          {product.stock}
-        </span>
-        <Button className="ml-auto py-1 px-2" onClick={() => addToCart(product)}>Tambahkan</Button>
-      </div>
+      <Button
+        className="w-full"
+        onClick={() => addToCart(product)}
+      >
+        <PlusIcon />
+      </Button>
     </div>
   );
 
@@ -147,7 +154,7 @@ export default function CashierPage() {
           <CardDescription>Layani pelanggan</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col h-full">
-          <div className="flex flex-row gap-2 h-full">
+          <div className="flex flex-row gap-1 h-full">
             <Card className="w-3/4 h-full" id="product-list">
               <CardHeader>
                 <CardTitle>Katalog Produk</CardTitle>
@@ -161,7 +168,7 @@ export default function CashierPage() {
                   />
                   <Search className="w-5 h-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {products.isLoading
                     ? renderSkeletons()
                     : filteredProducts.length
@@ -170,7 +177,7 @@ export default function CashierPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="flex-grow flex flex-col h-full" id="cart">
+            <Card className="flex flex-col h-full" id="cart">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <span>Keranjang</span>
@@ -186,7 +193,7 @@ export default function CashierPage() {
                   </Button>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-grow overflow-auto">
+              <CardContent className="overflow-auto">
                 <Table className="h-full">
                   <TableHeader>
                     <TableRow>
@@ -270,10 +277,10 @@ export default function CashierPage() {
         </CardContent>
       </Card>
       <Dialog {...customerDialog.props}>
-        <DialogHeader>
-          <DialogTitle>Cari pelanggan</DialogTitle>
-        </DialogHeader>
         <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cari pelanggan</DialogTitle>
+          </DialogHeader>
           <DataTable columns={customerColumns} data={customerList.data ?? []} isLoading={customerList.isLoading} />
         </DialogContent>
       </Dialog>
