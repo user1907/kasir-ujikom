@@ -15,6 +15,7 @@ import { api } from "@/trpc/react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { MinusIcon, PlusIcon, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 export default function CashierPage() {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -152,6 +153,18 @@ export default function CashierPage() {
     }
   ];
 
+  // Pembayaran
+  const { mutate: bayar } = api.transaction.create.useMutation({
+    onSuccess: async () => {
+      setProductsInCart([]);
+      setPaymentAmount(0);
+      await products.refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });
+
   return (
     <>
       <Card className="flex flex-col h-full" id="main-content">
@@ -265,6 +278,7 @@ export default function CashierPage() {
                       placeholder="Masukkan pembayaran"
                       className="flex-grow"
                       type="number"
+                      value={paymentAmount}
                       onChange={e => setPaymentAmount(Number(e.target.value))}
                     />
                   </div>
@@ -273,6 +287,10 @@ export default function CashierPage() {
                     <Button
                       className="flex-1"
                       disabled={paymentAmount < totalAmount || totalAmount === 0}
+                      onClick={() => bayar({
+                        carts: productsInCart,
+                        totalPrice: totalAmount
+                      })}
                     >
                       Bayar
                     </Button>
