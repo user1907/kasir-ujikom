@@ -43,7 +43,7 @@ export default function CashierPage() {
       if (existingProduct) {
         return prevCart.map((item) => {
           if (item.product.id === product.id) {
-            return { ...item, quantity: item.quantity++ };
+            return { ...item, quantity: item.quantity + 1 };
           }
           return item;
         });
@@ -89,34 +89,40 @@ export default function CashierPage() {
     </>
   );
 
-  const renderProductCard = (product: Product, index: number) => (
-    <div
-      key={index}
-      className="
-        p-4 border rounded-lg shadow-sm min-h-[25vh] flex flex-col justify-between
-      "
-    >
-      <div className="flex flex-col">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="font-semibold">{product.name}</span>
-        </div>
-        <div className="flex flex-col gap-1">
-          <span>{formatCurrency(product.price)}</span>
-          <span className="text-sm text-muted-foreground">
-            Stok:
-            {" "}
-            {product.stock}
-          </span>
-        </div>
-      </div>
-      <Button
-        className="w-full"
-        onClick={() => addToCart(product)}
+  const renderProductCard = (product: Product, index: number) => {
+    const productInCart = productsInCart.find(item => item.product.id === product.id);
+    const availableStock = product.stock - (productInCart ? productInCart.quantity : 0);
+
+    return (
+      <div
+        key={index}
+        className="
+          p-4 border rounded-lg shadow-sm min-h-[25vh] flex flex-col justify-between
+        "
       >
-        <PlusIcon />
-      </Button>
-    </div>
-  );
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="font-semibold">{product.name}</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span>{formatCurrency(product.price)}</span>
+            <span className="text-sm text-muted-foreground">
+              Stok:
+              {" "}
+              {availableStock}
+            </span>
+          </div>
+        </div>
+        <Button
+          className="w-full"
+          onClick={() => addToCart(product)}
+          disabled={availableStock === 0}
+        >
+          <PlusIcon />
+        </Button>
+      </div>
+    );
+  };
 
   const totalAmount = productsInCart.reduce(
     (acc, item) => acc + Number(item.product.price) * item.quantity,
@@ -220,6 +226,7 @@ export default function CashierPage() {
                             <Button
                               variant="ghost"
                               onClick={() => addToCart(item.product)}
+                              disabled={item.quantity >= item.product.stock}
                             >
                               <PlusIcon />
                             </Button>
