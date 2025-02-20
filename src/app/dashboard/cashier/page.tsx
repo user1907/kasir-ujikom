@@ -154,8 +154,8 @@ export default function CashierPage() {
           <CardDescription>Layani pelanggan</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col h-full">
-          <div className="flex flex-row gap-1 h-full">
-            <Card className="w-3/4 h-full" id="product-list">
+          <div className="flex flex-col lg:flex-row gap-1 h-full">
+            <Card className="w-full lg:w-1/2 h-full" id="product-list">
               <CardHeader>
                 <CardTitle>Katalog Produk</CardTitle>
               </CardHeader>
@@ -168,7 +168,7 @@ export default function CashierPage() {
                   />
                   <Search className="w-5 h-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {products.isLoading
                     ? renderSkeletons()
                     : filteredProducts.length
@@ -177,7 +177,7 @@ export default function CashierPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="flex flex-col h-full" id="cart">
+            <Card className="flex flex-col w-full lg:w-1/2 h-full flex-grow" id="cart">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <span>Keranjang</span>
@@ -193,7 +193,7 @@ export default function CashierPage() {
                   </Button>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="overflow-auto">
+              <CardContent className="overflow-auto flex-grow">
                 <Table className="h-full">
                   <TableHeader>
                     <TableRow>
