@@ -1,0 +1,1 @@
+ALTER TABLE "sales" RENAME COLUMN "date" TO "time";

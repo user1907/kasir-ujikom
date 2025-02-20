@@ -1,0 +1,1 @@
+ALTER TABLE "sales" ADD COLUMN "time" timestamp with time zone NOT NULL;

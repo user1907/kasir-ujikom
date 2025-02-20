@@ -23,3 +23,12 @@ export const ProductUpdateSchema = customersSchema.pick({ id: true })
   .merge(
     productsSchema.pick({ name: true, price: true, stock: true }).partial()
   );
+
+export const TransactionCreateSchema = z.object({
+  carts: z.object({
+    product: productsSchema,
+    quantity: z.number().int().positive()
+  }).array(),
+  customerId: z.number().int().positive().optional(),
+  totalPrice: z.number().int().positive()
+});

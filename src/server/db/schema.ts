@@ -1,7 +1,7 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { boolean, date, decimal, index, integer, pgEnum, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { boolean, decimal, index, integer, pgEnum, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -51,7 +51,7 @@ export const customersSchema = createSelectSchema(customers, {
 
 export const sales = pgTable("sales", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  date: date().notNull(),
+  time: timestamp({ withTimezone: true }).notNull(),
   totalPrice: decimal({ precision: 16, scale: 0 }).notNull(),
   customerId: integer().references(() => customers.id, { onDelete: "set null", onUpdate: "cascade" }),
   userId: integer().notNull().references(() => users.id, { onDelete: "restrict", onUpdate: "cascade" })

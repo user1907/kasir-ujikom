@@ -159,6 +159,7 @@ export default function CashierPage() {
       setProductsInCart([]);
       setPaymentAmount(0);
       await products.refetch();
+      toast.success("Transaksi berhasil!");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -283,7 +284,7 @@ export default function CashierPage() {
                     />
                   </div>
                   <div className="flex w-full mt-3 gap-2">
-                    <Button className="flex-1" onClick={customerDialog.trigger}>Tambah data pelanggan</Button>
+                    <Button className="flex-1" onClick={customerDialog.trigger}>Tautkan pelanggan</Button>
                     <Button
                       className="flex-1"
                       disabled={paymentAmount < totalAmount || totalAmount === 0}
@@ -306,7 +307,7 @@ export default function CashierPage() {
           <DialogHeader>
             <DialogTitle>Cari pelanggan</DialogTitle>
           </DialogHeader>
-          <DataTable columns={customerColumns} data={customerList.data ?? []} isLoading={customerList.isLoading} />
+          <DataTable columns={customerColumns} createDataAction={() => console.log("action")} createDataText="Tambah pelanggan" data={customerList.data ?? []} isLoading={customerList.isLoading} />
         </DialogContent>
       </Dialog>
     </>

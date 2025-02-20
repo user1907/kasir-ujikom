@@ -159,6 +159,7 @@ interface DataTableProps<TData, TValue> {
   createDataText?: string
   createDataAction?: () => void
   isLoading: boolean
+  filteredColumnName?: string
 }
 
 export function DataTable<TData, TValue>({
@@ -166,7 +167,8 @@ export function DataTable<TData, TValue>({
   data,
   createDataText,
   createDataAction,
-  isLoading
+  isLoading,
+  filteredColumnName
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -194,8 +196,8 @@ export function DataTable<TData, TValue>({
             <Input
               type="search"
               placeholder="Filter nama..."
-              value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-              onChange={event => table.getColumn("name")?.setFilterValue(event.target.value)}
+              value={(table.getColumn(filteredColumnName ?? "name")?.getFilterValue() as string) ?? ""}
+              onChange={event => table.getColumn(filteredColumnName ?? "name")?.setFilterValue(event.target.value)}
               className="pr-10" // Add padding to the right to make space for the icon
             />
             <Search className="w-5 h-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />

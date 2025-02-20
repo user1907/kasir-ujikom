@@ -1,21 +1,13 @@
-import { products, productsSchema, sales, salesDetails } from "@/server/db/schema";
+import { customers, products, sales, salesDetails, users } from "@/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { z } from "zod";
-import { and, eq, gte, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, gte, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-
-const schema = z.object({
-  carts: z.object({
-    product: productsSchema,
-    quantity: z.number().int().positive()
-  }).array(),
-  customerId: z.number().int().positive().optional(),
-  totalPrice: z.number().int().positive()
-});
+import { TransactionCreateSchema } from "@/schemas";
+import { selectArray } from "@/lib/utils";
 
 export const transactionRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(schema)
+    .input(TransactionCreateSchema)
     .mutation(async ({ ctx, input }) => {
       return ctx.db.transaction(async (trx) => {
         const availableProducts: typeof products.$inferSelect[] = [];
@@ -52,7 +44,7 @@ export const transactionRouter = createTRPCRouter({
         const [sale] = await trx
           .insert(sales)
           .values({
-            date: new Date().toISOString(),
+            time: new Date(),
             totalPrice: totalPrice.toString(),
             customerId: input.customerId,
             userId: ctx.user.id
@@ -80,5 +72,33 @@ export const transactionRouter = createTRPCRouter({
           details: detail
         };
       });
+    }),
+
+  list: protectedProcedure
+    .query(async ({ ctx }) => {
+      return ctx.db
+        .select({
+          id: sales.id,
+          time: sales.time,
+          totalPrice: sales.totalPrice,
+          customer: {
+            name: customers.name
+          },
+          user: {
+            name: users.name
+          },
+          details: selectArray<{ name: string, price: string, amount: number, subTotal: string }>("details", {
+            name: products.name,
+            price: products.price,
+            amount: salesDetails.amount,
+            subTotal: salesDetails.subTotal
+          })
+        })
+        .from(sales)
+        .innerJoin(salesDetails, eq(salesDetails.salesId, sales.id))
+        .innerJoin(products, eq(products.id, salesDetails.productId))
+        .innerJoin(users, eq(users.id, sales.userId))
+        .leftJoin(customers, eq(customers.id, sales.customerId))
+        .groupBy(sales.id, customers.name, users.name);
     })
 });
